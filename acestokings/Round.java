@@ -13,8 +13,8 @@ class Round
     public static final String DISCARD_PILE = "Discard Pile";
     public static final String PLAYER_HAND  = "Hand";
     
-    private static final int    STARTING_HAND_SIZE = 7;
-    private static final int    ROUND_CARD_VALUE   = 15;
+    private static final int STARTING_HAND_SIZE = 7;
+    private static final int ROUND_CARD_VALUE   = 15;
     
     private final ArrayList<Player> players_;
     private final Card.Face         roundFace_;
@@ -95,7 +95,8 @@ class Round
         int     currentPlayer = startingPlayer;
         do {
             Player player = players_.get(currentPlayer);
-            Turn   turn   = new Turn(); // Once turn is finished correct this
+            Turn   turn   = new Turn(player, roundFace_, deck_, discardPile_,
+                                     faceMelds_, runMelds_);
             turn.play();
             fillDeckIfNecessary();
             roundOver     = player.getCardBank(PLAYER_HAND).isEmpty();
