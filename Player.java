@@ -24,7 +24,7 @@ public class Player
     
     public Player(String name, Type type)
     {
-    this(name, type, 0, 0);
+        this(name, type, 0, 0);
     }
     
     public Player(String name, Type type, int nPoints, int minNPoints)

@@ -33,7 +33,7 @@ enum PlayerChoice
     TEN  (Type.FACE),
     JACK (Type.FACE),
     QUEEN(Type.FACE),
-    KING (Type.FACE);
+    KING (Type.FACE),
     
     CARD_ZERO (Type.CARD),
     CARD_ONE  (Type.CARD),
@@ -42,7 +42,7 @@ enum PlayerChoice
     CARD_FOUR (Type.CARD),
     CARD_FIVE (Type.CARD),
     CARD_SIX  (Type.CARD),
-    CARD_SEVEN(Type.CARD),
+    CARD_SEVEN(Type.CARD);
     
     enum Type
     {
@@ -70,7 +70,7 @@ enum PlayerChoice
         
         playerIO.sendMessage(message);
         playerIO.sendMessage("Please make your choice.");
-        int decision = playerIO.getInt(0, nChoices);
+        int decision = playerIO.chooseInt(0, nChoices);
         
         return choices[decision];
     }

@@ -1,6 +1,7 @@
 package cardgame.acestokings;
 
 import java.util.ArrayList;
+import cardgame.Deck;
 import cardgame.Player;
 import cardgame.PlayerIO;
 import cardgame.CardBank;
@@ -73,8 +74,8 @@ class Turn
     private void discard()
     {
         playerIO_.sendMessage("You must discard a card to end your turn.");
-        int cardIndex = chooseCard();
-        discardPile_.transfer(hand_, cardIndex, 1);
+        int handIndex = chooseCard();
+        discardPile_.add(0, hand_.discard(handIndex));
     }
     
     // Methods for managing the playing of cards from the hand
@@ -83,35 +84,39 @@ class Turn
         throws RuntimeException
     {
         playerIO_.sendMessage("What would you like to do?");
-        PlayerChoice decision = makeChoice(playerIO, PlayerChoice.Type.TURN);
-        
-        if (decision != END_TURN) {
-            String message = "Would you like to play to a run of cards of the "
-                           + "same suit, or a set of cards of the same face?";
-            playerIO_.sendMessage(message);
-            PlayerChoice destination = makeChoice(playerIO,
-                                           playerChoice.Type.DESTINATION);
-        }
-        
-        boolean turnOver;
+        PlayerChoice decision = PlayerChoice.makeChoice(playerIO_,
+                                    PlayerChoice.Type.TURN);
+        boolean      turnOver;
         
         switch (decision) {
             case PLAY_ONE:
-                playOne(destination);
-                turnOver = false;
-                break;
-            
-            case PLAY_THREE:
                 // The player must still be able to discard afterwards
-                boolean canPlay = hand_.getSize() > MELD_SIZE;
-                if (canPlay) {
-                    playThree(destination);
+                boolean canPlayOne = hand_.getSize() > 1;
+                
+                if (canPlayOne) {
+                    playOne();
                 }
                 else {
                     String message = "You must be able to discard to end your "
                                    + "turn!";
                     playerIO_.sendMessage(message);
                 }
+                
+                turnOver = false;
+                break;
+            
+            case PLAY_THREE:
+                boolean canPlayThree = hand_.getSize() > MELD_SIZE;
+                
+                if (canPlayThree) {
+                    playThree();
+                }
+                else {
+                    String message = "You must be able to discard to end your "
+                                   + "turn!";
+                    playerIO_.sendMessage(message);
+                }
+                
                 turnOver = false;
                 break;
             
@@ -128,9 +133,15 @@ class Turn
     }
     
     // Chooses a card and calls the appropriate method to play it
-    private void playOne(PlayerChoice destination)
+    private void playOne()
         throws RuntimeException
     {
+        String message = "Would you like to play to a run of cards of the "
+                       + "same suit, or a set of cards of the same face?";
+        playerIO_.sendMessage(message);
+        PlayerChoice destination = PlayerChoice.makeChoice(playerIO_,
+                                       PlayerChoice.Type.DESTINATION);
+        
         playerIO_.sendMessage("Please select a card.");
         int handIndex = chooseCard();
         
@@ -150,11 +161,17 @@ class Turn
     }
     
     // Chooses three cards and calls the appropriate method to play 
-    private void playThree(PlayerChoice destination)
+    private void playThree()
         throws RuntimeException
     {
+        String message = "Would you like to play to a run of cards of the "
+                       + "same suit, or a set of cards of the same face?";
+        playerIO_.sendMessage(message);
+        PlayerChoice destination = PlayerChoice.makeChoice(playerIO_,
+                                       PlayerChoice.Type.DESTINATION);
+        
         playerIO_.sendMessage("Please select three cards.");
-        int[] handIndices = new handIndices[MELD_SIZE];
+        int[] handIndices = new int[MELD_SIZE];
         
         for (int i = 0; i < MELD_SIZE; i++) {
             handIndices[i] = chooseCard();
@@ -233,10 +250,10 @@ class Turn
     }
     
     // Attempts to play three cards as a set of cards with the same face
-    private void playThreeToSameFace(int handIndices)
+    private void playThreeToSameFace(int[] handIndices)
     {
-        Card.Face firstFace   = hand_.getCard(handIndices[0]
-        boolean   isRoundCard = face == roundFace_;
+        Card.Face firstFace   = hand_.getCard(handIndices[0]).getFace();
+        boolean   isRoundCard = firstFace == roundFace_;
         
         firstFace = isRoundCard ? chooseFace() : firstFace;
         
@@ -340,3 +357,4 @@ class Turn
         
         return cardIndex;
     }
+}

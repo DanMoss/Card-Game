@@ -38,6 +38,11 @@ public class CardBank
         cards_.add(card);
     }
     
+    public void add(int index, Card card)
+    {
+        cards_.add(index, card);
+    }
+    
     public Card discard(int index)
     {
         return cards_.remove(index);
@@ -45,8 +50,7 @@ public class CardBank
     
     public void transfer(CardBank source, int firstIndex, int amount)
     {
-        int i;
-        for (i = 0; i < amount; i++) {
+        for (int i = 0; i < amount; i++) {
             add(source.discard(firstIndex));
         }
     }

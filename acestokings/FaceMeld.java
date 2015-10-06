@@ -1,5 +1,6 @@
 package cardgame.acestokings;
 
+import java.util.ArrayList;
 import cardgame.Card;
 import cardgame.CardBank;
 
@@ -13,7 +14,7 @@ class FaceMeld
     // Constructor
     public FaceMeld(Card.Face face, Card.Face roundFace)
     {
-        nSuits       = Card.Suit.values().length;
+        int nSuits   = Card.Suit.values().length;
         face_        = face;
         roundFace_   = roundFace;
         meld_        = new ArrayList<Card>(nSuits);
@@ -73,12 +74,17 @@ class FaceMeld
     public boolean canAdd(CardBank hand, int handIndex)
     {
         Card    card   = hand.getCard(handIndex);
-        boolean canAdd = nCards_ > 0;
+        int     nCards = meld_.size();
+        boolean canAdd = nCards > 0;
         
-        if (isRoundCard(card))
-            canAdd = canAdd && (nCards_ < meld_.length);
-        else
+        if (isRoundCard(card)) {
+            //  nSuits = Max arraylist size
+            int nSuits = Card.Suit.values().length;
+            canAdd     = canAdd && (nCards < nSuits);
+        }
+        else {
             canAdd = canAdd && isViableToAdd(card);
+        }
         
         return canAdd;
     }

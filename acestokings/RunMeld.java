@@ -12,7 +12,7 @@ class RunMeld
     // Constructor
     public RunMeld(Card.Suit suit, Card.Face roundFace)
     {
-        nFaces     = Card.Face.values().length;
+        int nFaces = Card.Face.values().length;
         suit_      = suit;
         roundFace_ = roundFace;
         meld_      = new Card[nFaces];
@@ -54,23 +54,21 @@ class RunMeld
     {
         Card    card      = hand.getCard(handIndex);
         boolean canAdd    = isViableToAdd(card, destinationIndex);
-        boolean meldBelow = meld_[destinationIndex - 1] != null;
-        boolean meldAbove = meld_[destinationIndex + 1] != null;
+        int     lastIndex = meld_.length - 1;
+        boolean meldBelow;
+        boolean meldAbove;
         
-        switch (destinationIndex) {
-            case 0:
-                meldBelow = false;
-                meldAbove = meld_[destinationIndex + 1] != null;
-                break;
-            
-            case meld_.length - 1:
-                meldBelow = meld_[destinationIndex - 1] != null;
-                meldAbove = false;
-                break;
-            
-            default:
-                meldBelow = meld_[destinationIndex - 1] != null;
-                meldAbove = meld_[destinationIndex + 1] != null;
+        if (destinationIndex == 0) {
+            meldBelow = false;
+            meldAbove = meld_[destinationIndex + 1] != null;
+        }
+        else if (destinationIndex == lastIndex) {
+            meldBelow = meld_[destinationIndex - 1] != null;
+            meldAbove = false;
+        }
+        else {
+            meldBelow = meld_[destinationIndex - 1] != null;
+            meldAbove = meld_[destinationIndex + 1] != null;
         }
         
         canAdd = canAdd && (meldBelow || meldAbove);
@@ -87,20 +85,21 @@ class RunMeld
                            int initialMeldIndex)
     {
         boolean canPlay = isViableRun(hand, handIndices, initialMeldIndex);
-        canPlay         = canPlay && allCardsDifferents(handIndices);
+        canPlay         = canPlay && allCardsDifferent(handIndices);
         
         if (canPlay) {
             for (int i = 0; i < handIndices.length; i++) {
-                Card card     = hand.getCard(handIndices[i]);
-                int meldIndex = initialMeldIndex + i;
-                canPlay       = canPlay && isViableToAdd(card, meldIndex);
+                Card card      = hand.getCard(handIndices[i]);
+                int  meldIndex = initialMeldIndex + i;
+                canPlay        = canPlay && isViableToAdd(card, meldIndex);
             }
         }
         
         return canPlay;
     }
     
-    // Checks that the selected card and destination is appropriate
+    // Checks that the selected card is of the correct suit and is being added
+    // to the correct index (or that the index is free if it is a round card).
     private boolean isViableToAdd(Card card, int destinationIndex)
     {
         boolean isRoundCard  = isRoundCard(card);
@@ -115,7 +114,7 @@ class RunMeld
         }
         else {
             isValidDestination = (destinationIndex ==
-                                  card.getFace().getValue() - 1)
+                                  card.getFace().getValue() - 1);
         }
         
         isViableToAdd = isValidSuit && isValidDestination;
