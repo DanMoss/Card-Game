@@ -12,41 +12,11 @@ enum PlayerChoice
     END_TURN  (Type.TURN),
     
     RUN      (Type.DESTINATION),
-    SAME_FACE(Type.DESTINATION),
-    
-    // Future note: Remove the following and use Card.Suit in implementations
-    CLUBS   (Type.SUIT),
-    DIAMONDS(Type.SUIT),
-    HEARTS  (Type.SUIT),
-    SPADES  (Type.SUIT),
-    
-    // Future note: Remove the following and use Card.Face in implementations
-    ACE  (Type.FACE),
-    TWO  (Type.FACE),
-    THREE(Type.FACE),
-    FOUR (Type.FACE),
-    FIVE (Type.FACE),
-    SIX  (Type.FACE),
-    SEVEN(Type.FACE),
-    EIGHT(Type.FACE),
-    NINE (Type.FACE),
-    TEN  (Type.FACE),
-    JACK (Type.FACE),
-    QUEEN(Type.FACE),
-    KING (Type.FACE),
-    
-    CARD_ZERO (Type.CARD),
-    CARD_ONE  (Type.CARD),
-    CARD_TWO  (Type.CARD),
-    CARD_THREE(Type.CARD),
-    CARD_FOUR (Type.CARD),
-    CARD_FIVE (Type.CARD),
-    CARD_SIX  (Type.CARD),
-    CARD_SEVEN(Type.CARD);
+    SAME_FACE(Type.DESTINATION);
     
     enum Type
     {
-        DRAW, TURN, DESTINATION, CARD, SUIT, FACE;
+        DRAW, TURN, DESTINATION;
     }
     
     private Type type_;

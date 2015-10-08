@@ -97,7 +97,7 @@ class Round
         int     currentPlayer = startingPlayer;
         do {
             Player p    = players_.get(currentPlayer);
-            Turn   turn = new Turn(player, roundFace_, deck_, discardPile_,
+            Turn   turn = new Turn(p, roundFace_, deck_, discardPile_,
                                    faceMelds_, runMelds_);
             turn.play();
             fillDeckIfNecessary();
@@ -110,7 +110,7 @@ class Round
     private void fillDeckIfNecessary()
     {
         if (deck_.isEmpty()) {
-            deck_.transferFrom(discardPile_, 1, discardPile_.getSize() - 1);
+            deck_.transferFrom(discardPile_, 1, discardPile_.size() - 1);
             deck_.shuffle();
         }
     }
@@ -130,7 +130,7 @@ class Round
                 else
                     points += face.getValue();
             }
-            player.getPoints().add(points);
+            p.getPoints().add(points);
         }
     }
 }

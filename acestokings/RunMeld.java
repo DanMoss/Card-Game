@@ -26,33 +26,31 @@ class RunMeld
     
     // Other methods
     // Adds a single card to the meld and replaces a round card if necessary
-    public void add(CardBank hand, int handIndex, int destinationIndex)
+    public void add(CardBank hand, Card card, int destinationIndex)
     {
-        Card card        = hand.getCard(handIndex);
         Card destination = meld_[destinationIndex];
         
         if (!isRoundCard(card) && destination != null)
             hand.add(destination);
         
         meld_[destinationIndex] = card;
-        hand.discard(handIndex);
+        hand.discard(card);
     }
     
     // Plays a run of cards of the same suit, replacing round cards if
     // necessary.
-    // Note that handIndices should list the cards in ascending order.
-    public void play(CardBank hand, int[] handIndices, int initialMeldIndex)
+    // Note that {@code cards} should list the cards in ascending order.
+    public void play(CardBank hand, Card[] cards, int initialMeldIndex)
     {
-        for (int i = 0; i < handIndices.length; i++) {
-            add(hand, handIndices[i], initialMeldIndex + i);
+        for (int i = 0; i < cards.length; i++) {
+            add(hand, cards[i], initialMeldIndex + i);
         }
     }
     
     // Calls isViableToAdd to check the card is appropriate, and then checks if
     // there is an existing meld to attach the card to.
-    public boolean canAdd(CardBank hand, int handIndex, int destinationIndex)
+    public boolean canAdd(CardBank hand, Card card, int destinationIndex)
     {
-        Card    card      = hand.getCard(handIndex);
         boolean canAdd    = isViableToAdd(card, destinationIndex);
         int     lastIndex = meld_.length - 1;
         boolean meldBelow;
@@ -80,16 +78,15 @@ class RunMeld
     // There is space for a meld, that the set of cards is a run, that all the
     // given cards are different, and that the cards are appropriate for the
     // meld.
-    // Note that handIndices should list the cards in ascending order.
-    public boolean canPlay(CardBank hand, int[] handIndices,
-                           int initialMeldIndex)
+    // Note that {@code cards} should list the cards in ascending order.
+    public boolean canPlay(CardBank hand, Card[] cards, int initialMeldIndex)
     {
-        boolean canPlay = isViableRun(hand, handIndices, initialMeldIndex);
-        canPlay         = canPlay && allCardsDifferent(handIndices);
+        boolean canPlay = isViableRun(hand, cards, initialMeldIndex);
+        canPlay         = canPlay && allCardsDifferent(cards);
         
         if (canPlay) {
-            for (int i = 0; i < handIndices.length; i++) {
-                Card card      = hand.getCard(handIndices[i]);
+            for (int i = 0; i < cards.length; i++) {
+                Card card      = cards[i];
                 int  meldIndex = initialMeldIndex + i;
                 canPlay        = canPlay && isViableToAdd(card, meldIndex);
             }
@@ -124,16 +121,16 @@ class RunMeld
     
     // Checks that there is enough space for the meld, and that the meld is
     // actually a run of cards
-    private boolean isViableRun(CardBank hand, int[] handIndices,
+    private boolean isViableRun(CardBank hand, Card[] cards,
                                 int initialMeldIndex)
     {
         int     availableSlots   = meld_.length - initialMeldIndex;
-        boolean isViableRun      = handIndices.length < availableSlots;
+        boolean isViableRun      = cards.length < availableSlots;
         int     previousCardFace = initialMeldIndex + 1; // Face value = index + 1
         int     currentCardFace;
         
-        for (int i = 1; i < handIndices.length; i++) {
-            Card testCard = hand.getCard(handIndices[i]);
+        for (int i = 1; i < cards.length; i++) {
+            Card testCard = cards[i];
             
             if (isRoundCard(testCard)) {
                 currentCardFace = previousCardFace + 1;
@@ -151,16 +148,16 @@ class RunMeld
     }
     
     // Checks that all of the cards given are different
-    private boolean allCardsDifferent(int[] handIndices)
+    private boolean allCardsDifferent(Card[] cards)
     {
         boolean allCardsDifferent = true;
         boolean completedSearch;
-        int     nCards = handIndices.length;
-        int     i      = 0;
+        int     nCards = cards.length;
         
+        int i = 0;
         do {
             for (int j = i + 1; j < nCards; j++) {
-                if (handIndices[i] == handIndices[j])
+                if (cards[i].equals(cards[j]))
                     allCardsDifferent = false;
             }
             

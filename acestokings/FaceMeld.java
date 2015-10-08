@@ -30,10 +30,8 @@ class FaceMeld
     // Other methods
     // Adds a single card to the meld and replaces a round card if necessary
     // Note round cards are always placed at the front of the meld
-    public void add(CardBank hand, int handIndex)
+    public void add(CardBank hand, Card card)
     {
-        Card card = hand.getCard(handIndex);
-        
         if (isRoundCard(card)) {
             meld_.add(0, card);
             nRoundCards_++;
@@ -48,15 +46,15 @@ class FaceMeld
             meld_.add(card);
         }
         
-        hand.discard(handIndex);
+        hand.discard(card);
     }
     
     // Plays a set of cards with the same face
     // Note round cards are always placed at the front of the meld
-    public void play(CardBank hand, int[] handIndices)
+    public void play(CardBank hand, Card[] cards)
     {
-        for (int i = 0; i < handIndices.length; i++) {
-            Card card = hand.getCard(handIndices[i]);
+        for (int i = 0; i < cards.length; i++) {
+            Card card = cards[i];
             
             if (isRoundCard(card)) {
                 meld_.add(0, card);
@@ -66,14 +64,13 @@ class FaceMeld
                 meld_.add(card);
             }
             
-            hand.discard(handIndices[i]);
+            hand.discard(card);
         }
     }
     
     // Checks that the meld exists and if the card is appropriate for the meld
-    public boolean canAdd(CardBank hand, int handIndex)
+    public boolean canAdd(CardBank hand, Card card)
     {
-        Card    card   = hand.getCard(handIndex);
         int     nCards = meld_.size();
         boolean canAdd = nCards > 0;
         
@@ -92,12 +89,12 @@ class FaceMeld
     // Checks all necessary conditions to play a meld. In order these are:
     // All the given cards are different, the meld doesn't already exist, and 
     // that the cards selected are a mix of round cards and viable face cards.
-    public boolean canPlay(CardBank hand, int[] handIndices)
+    public boolean canPlay(CardBank hand, Card[] cards)
     {
-        boolean canPlay = allCardsDifferent(handIndices) && meld_.size() == 0;
+        boolean canPlay = allCardsDifferent(cards) && meld_.size() == 0;
         
-        for (int i = 0; i < handIndices.length; i++) {
-            Card card = hand.getCard(handIndices[i]);
+        for (int i = 0; i < cards.length; i++) {
+            Card card = cards[i];
             canPlay   = canPlay && isViableToAdd(card);
         }
         
@@ -119,16 +116,16 @@ class FaceMeld
     }
     
     // Checks that all of the cards given are different
-    private boolean allCardsDifferent(int[] handIndices)
+    private boolean allCardsDifferent(Card[] cards)
     {
         boolean allCardsDifferent = true;
         boolean completedSearch;
-        int     nCards = handIndices.length;
-        int     i      = 0;
+        int     nCards = cards.length;
         
+        int i = 0;
         do {
             for (int j = i + 1; j < nCards; j++) {
-                if (handIndices[i] == handIndices[j])
+                if (cards[i].equals(cards[j]))
                     allCardsDifferent = false;
             }
             

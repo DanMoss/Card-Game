@@ -58,7 +58,7 @@ public class CardBank
         return cards_.remove(index);
     }
     
-    public Card discard(Card card)
+    public boolean discard(Card card)
     {
         return cards_.remove(card);
     }
@@ -71,5 +71,11 @@ public class CardBank
     public boolean isEmpty()
     {
         return cards_.isEmpty();
+    }
+    
+    public Card[] toArray()
+    {
+        Card[] cards = new Card[size()];
+        return cards_.toArray(cards);
     }
 }

@@ -57,11 +57,11 @@ class Turn
         
         switch (decision) {
             case DECK:
-                hand_.transfer(deck_, 0, 1);
+                hand_.transferFrom(deck_, 0, 1);
                 break;
             
             case DISCARD_PILE:
-                hand_.transfer(discardPile_, 0, 1);
+                hand_.transferFrom(discardPile_, 0, 1);
                 break;
             
             default:
@@ -74,8 +74,9 @@ class Turn
     private void discard()
     {
         playerIO_.sendMessage("You must discard a card to end your turn.");
-        int handIndex = chooseCard();
-        discardPile_.add(0, hand_.discard(handIndex));
+        Card card = chooseCard();
+        hand_.discard(card);
+        discardPile_.add(0, card);
     }
     
     // Methods for managing the playing of cards from the hand
@@ -143,15 +144,15 @@ class Turn
                                        PlayerChoice.Type.DESTINATION);
         
         playerIO_.sendMessage("Please select a card.");
-        int handIndex = chooseCard();
+        Card card = chooseCard();
         
         switch (destination) {
             case RUN:
-                playOneToRun(handIndex);
+                playOneToRun(card);
                 break;
             
             case SAME_FACE:
-                playOneToSameFace(handIndex);
+                playOneToSameFace(card);
                 break;
             
             default:
@@ -171,19 +172,19 @@ class Turn
                                        PlayerChoice.Type.DESTINATION);
         
         playerIO_.sendMessage("Please select three cards.");
-        int[] handIndices = new int[MELD_SIZE];
+        Card[] cards = new Card[MELD_SIZE];
         
         for (int i = 0; i < MELD_SIZE; i++) {
-            handIndices[i] = chooseCard();
+            cards[i] = chooseCard();
         }
         
         switch (destination) {
             case RUN:
-                playThreeToRun(handIndices);
+                playThreeToRun(cards);
                 break;
             
             case SAME_FACE:
-                playThreeToSameFace(handIndices);
+                playThreeToSameFace(cards);
                 break;
             
             default:
@@ -193,10 +194,10 @@ class Turn
     }
     
     // Attempts to play a card to a run of cards
-    private void playOneToRun(int handIndex)
+    private void playOneToRun(Card card)
     {
-        Card.Face face        = hand_.getCard(handIndex).getFace();
-        Card.Suit suit        = hand_.getCard(handIndex).getSuit();
+        Card.Face face        = card.getFace();
+        Card.Suit suit        = card.getSuit();
         boolean   isRoundCard = face == roundFace_;
         
         face = isRoundCard ? chooseFace() : face;
@@ -204,19 +205,19 @@ class Turn
         
         int     index      = face.getValue() - 1;
         RunMeld meld       = runMelds_[suit.getValue() - 1];
-        boolean isPlayable = meld.canAdd(hand_, handIndex, index);
+        boolean isPlayable = meld.canAdd(hand_, card, index);
         
         if (isPlayable)
-            meld.add(hand_, handIndex, index);
+            meld.add(hand_, card, index);
         else
             playerIO_.sendMessage("Invalid move.");
     }
     
     // Attempts to play three cards as a run of cards
-    private void playThreeToRun(int[] handIndices)
+    private void playThreeToRun(Card[] cards)
     {
-        Card.Face firstFace   = hand_.getCard(handIndices[0]).getFace();
-        Card.Suit firstSuit   = hand_.getCard(handIndices[0]).getSuit();
+        Card.Face firstFace   = cards[0].getFace();
+        Card.Suit firstSuit   = cards[0].getSuit();
         boolean   isRoundCard = firstFace == roundFace_;
         
         firstFace = isRoundCard ? chooseFace() : firstFace;
@@ -224,44 +225,44 @@ class Turn
         
         int     index      = firstFace.getValue() - 1;
         RunMeld meld       = runMelds_[firstSuit.getValue() - 1];
-        boolean isPlayable = meld.canPlay(hand_, handIndices, index);
+        boolean isPlayable = meld.canPlay(hand_, cards, index);
         
         if (isPlayable)
-            meld.play(hand_, handIndices, index);
+            meld.play(hand_, cards, index);
         else
             playerIO_.sendMessage("Invalid move.");
     }
     
     // Attempts to play a card to a set of card with the same face
-    private void playOneToSameFace(int handIndex)
+    private void playOneToSameFace(Card card)
     {
-        Card.Face face        = hand_.getCard(handIndex).getFace();
+        Card.Face face        = card.getFace();
         boolean   isRoundCard = face == roundFace_;
         
         face = isRoundCard ? chooseFace() : face;
         
         FaceMeld meld       = faceMelds_[face.getValue() - 1];
-        boolean  isPlayable = meld.canAdd(hand_, handIndex);
+        boolean  isPlayable = meld.canAdd(hand_, card);
         
         if (isPlayable)
-            meld.add(hand_, handIndex);
+            meld.add(hand_, card);
         else
             playerIO_.sendMessage("Invalid move.");
     }
     
     // Attempts to play three cards as a set of cards with the same face
-    private void playThreeToSameFace(int[] handIndices)
+    private void playThreeToSameFace(Card[] cards)
     {
-        Card.Face firstFace   = hand_.getCard(handIndices[0]).getFace();
+        Card.Face firstFace   = cards[0].getFace();
         boolean   isRoundCard = firstFace == roundFace_;
         
         firstFace = isRoundCard ? chooseFace() : firstFace;
         
         FaceMeld meld       = faceMelds_[firstFace.getValue() - 1];
-        boolean  isPlayable = meld.canPlay(hand_, handIndices);
+        boolean  isPlayable = meld.canPlay(hand_, cards);
         
         if (isPlayable)
-            meld.play(hand_, handIndices);
+            meld.play(hand_, cards);
         else
             playerIO_.sendMessage("Invalid move.");
     }
@@ -273,30 +274,7 @@ class Turn
         String message = "You have chosen to play a round card. Please select "
                        + "a face for this card to mimic.";
         playerIO_.sendMessage(message);
-        PlayerChoice face = PlayerChoice.makeChoice(playerIO_,
-                                                    PlayerChoice.Type.FACE);
-        Card.Face convertedFace;
-        
-        switch (face) {
-            case ACE:    convertedFace = Card.Face.ACE;    break;
-            case TWO:    convertedFace = Card.Face.TWO;    break;
-            case THREE:  convertedFace = Card.Face.THREE;  break;
-            case FOUR:   convertedFace = Card.Face.FOUR;   break;
-            case FIVE:   convertedFace = Card.Face.FIVE;   break;
-            case SIX:    convertedFace = Card.Face.SIX;    break;
-            case SEVEN:  convertedFace = Card.Face.SEVEN;  break;
-            case EIGHT:  convertedFace = Card.Face.EIGHT;  break;
-            case NINE:   convertedFace = Card.Face.NINE;   break;
-            case TEN:    convertedFace = Card.Face.TEN;    break;
-            case JACK:   convertedFace = Card.Face.JACK;   break;
-            case QUEEN:  convertedFace = Card.Face.QUEEN;  break;
-            case KING:   convertedFace = Card.Face.KING;   break;
-            
-            default:
-                throw new RuntimeException("Unexpected face choice: " + face);
-        }
-        
-        return convertedFace;
+        return Selector.select(playerIO_, Card.Face.values());
     }
     
     // Chooses a suit for a round card to mimic
@@ -305,56 +283,12 @@ class Turn
         String message = "You have chosen to play a round card. Please select "
                        + "a suit for this card to mimic.";
         playerIO_.sendMessage(message);
-        PlayerChoice suit = PlayerChoice.makeChoice(playerIO_,
-                                                    PlayerChoice.Type.SUIT);
-        Card.Suit convertedSuit;
-        
-        switch (suit) {
-            case CLUBS:     convertedSuit = Card.Suit.CLUBS;     break;
-            case DIAMONDS:  convertedSuit = Card.Suit.DIAMONDS;  break;
-            case HEARTS:    convertedSuit = Card.Suit.HEARTS;    break;
-            case SPADES:    convertedSuit = Card.Suit.SPADES;    break;
-            
-            default:
-                throw new RuntimeException("Unexpected suit choice: " + suit);
-        }
-        
-        return convertedSuit;
+        return Selector.select(playerIO_, Card.Suit.values());
     }
     
     // Manages the selection of a card by the player
-    private int chooseCard()
-        throws RuntimeException
+    private Card chooseCard()
     {
-        boolean cardExists;
-        int     cardIndex;
-        
-        do {
-            PlayerChoice decision;
-            decision = PlayerChoice.makeChoice(playerIO_,
-                                               PlayerChoice.Type.CARD);
-            
-            switch (decision) {
-                case CARD_ZERO:   cardIndex = 0;  break;
-                case CARD_ONE:    cardIndex = 1;  break;
-                case CARD_TWO:    cardIndex = 2;  break;
-                case CARD_THREE:  cardIndex = 3;  break;
-                case CARD_FOUR:   cardIndex = 4;  break;
-                case CARD_FIVE:   cardIndex = 5;  break;
-                case CARD_SIX:    cardIndex = 6;  break;
-                case CARD_SEVEN:  cardIndex = 7;  break;
-                
-                default:
-                    throw new RuntimeException("Unexpected card choice: "
-                                               + decision);
-            }
-            
-            cardExists = (cardIndex < hand_.size());
-            if (!cardExists)
-                playerIO_.sendMessage("You don't have that many cards!");
-            
-        } while (!cardExists);
-        
-        return cardIndex;
+        return Selector.select(playerIO_, hand_.toArray());
     }
 }
