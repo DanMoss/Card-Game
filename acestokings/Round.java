@@ -69,13 +69,15 @@ class Round
     {
         deck_.shuffle();
         for (int i = 0; i < players_.size(); i++) {
-            Player player = players_.get(i);
-            player.wipeCardBanks();
+            Player   p    = players_.get(i);
             CardBank hand = new CardBank(PLAYER_HAND, STARTING_HAND_SIZE + 1);
-            hand.transfer(deck_, 0, STARTING_HAND_SIZE);
-            player.addCardBank(hand);
+            hand.transferFrom(deck_, 0, STARTING_HAND_SIZE);
+            
+            ArrayList<CardBank> pCardBanks = p.getCardBanks();
+            pCardBanks.clear();
+            pCardBanks.add(hand);
         }
-        discardPile_.transfer(deck_, 0, 1);
+        discardPile_.transferFrom(deck_, 0, 1);
     }
     
     // Finds the players who plays first
@@ -94,12 +96,12 @@ class Round
         boolean roundOver;
         int     currentPlayer = startingPlayer;
         do {
-            Player player = players_.get(currentPlayer);
-            Turn   turn   = new Turn(player, roundFace_, deck_, discardPile_,
-                                     faceMelds_, runMelds_);
+            Player p    = players_.get(currentPlayer);
+            Turn   turn = new Turn(player, roundFace_, deck_, discardPile_,
+                                   faceMelds_, runMelds_);
             turn.play();
             fillDeckIfNecessary();
-            roundOver     = player.getCardBank(PLAYER_HAND).isEmpty();
+            roundOver     = p.findCardBank(PLAYER_HAND).isEmpty();
             currentPlayer = (currentPlayer + 1) % players_.size();
         } while (!roundOver);
     }
@@ -108,7 +110,7 @@ class Round
     private void fillDeckIfNecessary()
     {
         if (deck_.isEmpty()) {
-            deck_.transfer(discardPile_, 1, discardPile_.getSize() - 1);
+            deck_.transferFrom(discardPile_, 1, discardPile_.getSize() - 1);
             deck_.shuffle();
         }
     }
@@ -118,10 +120,10 @@ class Round
     {
         for (int i = 0; i < players_.size(); i++) {
             int      points = 0;
-            Player   player = players_.get(i);
-            CardBank hand   = player.getCardBank(PLAYER_HAND);
+            Player   p      = players_.get(i);
+            CardBank hand   = p.findCardBank(PLAYER_HAND);
             
-            for (int j = 0; j < hand.getSize(); j++) {
+            for (int j = 0; j < hand.size(); j++) {
                 Card.Face face = hand.getCard(j).getFace();
                 if (face == roundFace_)
                     points += ROUND_CARD_VALUE;

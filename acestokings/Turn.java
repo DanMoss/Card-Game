@@ -24,7 +24,7 @@ class Turn
                 CardBank discardPile, FaceMeld[] faceMelds, RunMeld[] runMelds)
     {
         playerIO_    = player.getPlayerIO();
-        hand_        = player.getCardBank(Round.PLAYER_HAND);
+        hand_        = player.findCardBank(Round.PLAYER_HAND);
         roundFace_   = roundFace;
         deck_        = deck;
         discardPile_ = discardPile;
@@ -91,7 +91,7 @@ class Turn
         switch (decision) {
             case PLAY_ONE:
                 // The player must still be able to discard afterwards
-                boolean canPlayOne = hand_.getSize() > 1;
+                boolean canPlayOne = hand_.size() > 1;
                 
                 if (canPlayOne) {
                     playOne();
@@ -106,7 +106,7 @@ class Turn
                 break;
             
             case PLAY_THREE:
-                boolean canPlayThree = hand_.getSize() > MELD_SIZE;
+                boolean canPlayThree = hand_.size() > MELD_SIZE;
                 
                 if (canPlayThree) {
                     playThree();
@@ -349,7 +349,7 @@ class Turn
                                                + decision);
             }
             
-            cardExists = (cardIndex < hand_.getSize());
+            cardExists = (cardIndex < hand_.size());
             if (!cardExists)
                 playerIO_.sendMessage("You don't have that many cards!");
             

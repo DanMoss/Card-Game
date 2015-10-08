@@ -64,6 +64,7 @@ public class Card
         return face_;
     }
     
+    // Other methods
     @Override
     public boolean equals(Object object)
     {
@@ -77,7 +78,6 @@ public class Card
                 (face_ == card.face_));
     }
     
-    // Future note: Implementation of this is wrong - requires fix
     @Override
     public int hashCode()
     {
@@ -85,7 +85,7 @@ public class Card
         int prime2 = 31;
         int result;
         result = prime2 * prime1 + suit_.hashCode();
-        result = prime2 * prime1 + face_.hashCode();
+        result = result * prime1 + face_.hashCode();
         return result;
     }
     

@@ -37,28 +37,14 @@ public class Player
     }
     
     // Accessors
-    public CardBank getCardBank(String name)
+    public String getName()
     {
-        int     nCardBanks = cardBanks_.size();
-        boolean isFound    = false;
-        String  testName;
-        
-        int i = 0;
-        while (!(isFound) && (i < nCardBanks)) {
-            testName = cardBanks_.get(i).getName();
-            
-            if (testName.equals(name))
-                isFound = true;
-            else
-                i++;
-        }
-        
-        return cardBanks_.get(i);
+        return name_;
     }
     
-    public Points getPoints()
+    public ArrayList<CardBank> getCardBanks()
     {
-        return points_;
+        return cardBanks_;
     }
     
     public PlayerIO getPlayerIO()
@@ -66,6 +52,12 @@ public class Player
         return playerIO_;
     }
     
+    public Points getPoints()
+    {
+        return points_;
+    }
+    
+    // Mutator
     private void setPlayerIO(Type type)
     {
         switch (type) {
@@ -74,7 +66,7 @@ public class Player
                 break;
             
             case SKYPE:
-                playerIO_ = new SkypePlayerIO();
+                //playerIO_ = new SkypePlayerIO();
                 break;
             
             default:
@@ -83,13 +75,21 @@ public class Player
     }
     
     // Other methods
-    public void addCardBank(CardBank cardBank)
+    public CardBank findCardBank(String name)
     {
-        cardBanks_.add(cardBank);
-    }
-    
-    public void wipeCardBanks()
-    {
-        cardBanks_.clear();
+        int     nCardBanks = cardBanks_.size();
+        boolean isFound    = false;
+        
+        int i = 0;
+        while (!isFound && i < nCardBanks) {
+            String testName = cardBanks_.get(i).getName();
+            
+            if (testName.equals(name))
+                isFound = true;
+            else
+                i++;
+        }
+        
+        return cardBanks_.get(i);
     }
 }

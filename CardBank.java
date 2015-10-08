@@ -6,10 +6,10 @@ import java.util.Random;
 
 public class CardBank
 {
-    private String          name_;
-    private ArrayList<Card> cards_;
+    private final String          name_;
+    private final ArrayList<Card> cards_;
         
-    // Constructors
+    // Constructor
     public CardBank(String name, int nCards)
     {
         name_  = name;
@@ -27,12 +27,22 @@ public class CardBank
         return cards_.get(i);
     }
     
-    public int getSize()
+    // Other methods
+    // Transfers amount cards from the source CardBank, beginning at firstIndex
+    public void transferFrom(CardBank source, int firstIndex, int amount)
     {
-        return cards_.size();
+        for (int i = 0; i < amount; i++) {
+            add(source.discard(firstIndex));
+        }
     }
     
-    // Other methods
+    public void shuffle()
+    {
+        Random rng = new Random();
+        Collections.shuffle(cards_, rng);
+    }
+    
+    // ArrayList method shortcuts
     public void add(Card card)
     {
         cards_.add(card);
@@ -48,17 +58,14 @@ public class CardBank
         return cards_.remove(index);
     }
     
-    public void transfer(CardBank source, int firstIndex, int amount)
+    public Card discard(Card card)
     {
-        for (int i = 0; i < amount; i++) {
-            add(source.discard(firstIndex));
-        }
+        return cards_.remove(card);
     }
     
-    public void shuffle()
+    public int size()
     {
-        Random rng = new Random();
-        Collections.shuffle(cards_, rng);
+        return cards_.size();
     }
     
     public boolean isEmpty()
