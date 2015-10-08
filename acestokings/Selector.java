@@ -2,8 +2,13 @@ package cardgame.acestokings;
 
 import cardgame.PlayerIO;
 
-abstract class Selector
+class Selector
 {
+    // Constructor
+    private Selector()
+    {
+    }
+    
     // Prompts the player to choose one of the {@code options} and returns
     // the choice
     public static <Type> Type select(PlayerIO playerIO, Type[] options)

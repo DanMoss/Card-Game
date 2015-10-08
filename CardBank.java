@@ -42,6 +42,12 @@ public class CardBank
         Collections.shuffle(cards_, rng);
     }
     
+    @Override
+    public String toString()
+    {
+        return name_;
+    }
+    
     // ArrayList method shortcuts
     public void add(Card card)
     {

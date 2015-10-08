@@ -4,9 +4,6 @@ import cardgame.PlayerIO;
 
 enum PlayerChoice
 {
-    DECK        (Type.DRAW),
-    DISCARD_PILE(Type.DRAW),
-    
     PLAY_ONE  (Type.TURN),
     PLAY_THREE(Type.TURN),
     END_TURN  (Type.TURN),
@@ -16,7 +13,7 @@ enum PlayerChoice
     
     enum Type
     {
-        DRAW, TURN, DESTINATION;
+        TURN, DESTINATION;
     }
     
     private Type type_;

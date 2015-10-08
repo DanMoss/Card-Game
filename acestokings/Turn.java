@@ -46,35 +46,20 @@ class Turn
     
     // Manages the draw phase of the player's turn
     private void draw()
-        throws RuntimeException
     {
-        String message = "You may draw from the deck, or you may take the "
-                       + discardPile_.getCard(0) + " from the discard pile.";
+        String message = "Would you like to draw from the deck, or take the "
+                       + discardPile_.getCard(0) + " from the discard pile?";
         playerIO_.sendMessage(message);
-        
-        PlayerChoice decision;
-        decision = PlayerChoice.makeChoice(playerIO_, PlayerChoice.Type.DRAW);
-        
-        switch (decision) {
-            case DECK:
-                hand_.transferFrom(deck_, 0, 1);
-                break;
-            
-            case DISCARD_PILE:
-                hand_.transferFrom(discardPile_, 0, 1);
-                break;
-            
-            default:
-                throw new RuntimeException("Unexpected draw source: "
-                                           + decision);
-        }
+        CardBank[] options    = {deck_, discardPile_};
+        CardBank   drawSource = Selector.select(playerIO_, options);
+        hand_.transferFrom(drawSource, 0, 1);
     }
     
     // Manages the discard phase of the player's turn
     private void discard()
     {
         playerIO_.sendMessage("You must discard a card to end your turn.");
-        Card card = chooseCard();
+        Card card = Selector.select(playerIO_, hand_.toArray());
         hand_.discard(card);
         discardPile_.add(0, card);
     }
@@ -144,7 +129,7 @@ class Turn
                                        PlayerChoice.Type.DESTINATION);
         
         playerIO_.sendMessage("Please select a card.");
-        Card card = chooseCard();
+        Card card = Selector.select(playerIO_, hand_.toArray());
         
         switch (destination) {
             case RUN:
@@ -175,7 +160,7 @@ class Turn
         Card[] cards = new Card[MELD_SIZE];
         
         for (int i = 0; i < MELD_SIZE; i++) {
-            cards[i] = chooseCard();
+            cards[i] = Selector.select(playerIO_, hand_.toArray());
         }
         
         switch (destination) {
@@ -284,11 +269,5 @@ class Turn
                        + "a suit for this card to mimic.";
         playerIO_.sendMessage(message);
         return Selector.select(playerIO_, Card.Suit.values());
-    }
-    
-    // Manages the selection of a card by the player
-    private Card chooseCard()
-    {
-        return Selector.select(playerIO_, hand_.toArray());
     }
 }
