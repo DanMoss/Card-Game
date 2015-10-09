@@ -1,30 +1,32 @@
-package cardgame.acestokings;
+package cardgame.games.acestokings.melds;
 
 import java.util.ArrayList;
-import cardgame.Card;
-import cardgame.CardBank;
+import cardgame.card.Rank;
+import cardgame.card.Suit;
+import cardgame.card.Card;
+import cardgame.card.CardBank;
 
-class FaceMeld
+public class RankMeld
 {
-    private Card.Face       face_;
-    private Card.Face       roundFace_;
+    private Rank            rank_;
+    private Rank            roundRank_;
     private ArrayList<Card> meld_;
     private int             nRoundCards_;
     
     // Constructor
-    public FaceMeld(Card.Face face, Card.Face roundFace)
+    public RankMeld(Rank rank, Rank roundRank)
     {
-        int nSuits   = Card.Suit.values().length;
-        face_        = face;
-        roundFace_   = roundFace;
+        int nSuits   = Suit.values().length;
+        rank_        = rank;
+        roundRank_   = roundRank;
         meld_        = new ArrayList<Card>(nSuits);
         nRoundCards_ = 0;
     }
     
     // Accessors
-    public Card.Face getMeldType()
+    public Rank getMeldType()
     {
-        return face_;
+        return rank_;
     }
     
     // Other methods
@@ -49,7 +51,7 @@ class FaceMeld
         hand.discard(card);
     }
     
-    // Plays a set of cards with the same face
+    // Plays a set of cards with the same rank
     // Note round cards are always placed at the front of the meld
     public void play(CardBank hand, Card[] cards)
     {
@@ -76,7 +78,7 @@ class FaceMeld
         
         if (isRoundCard(card)) {
             //  nSuits = Max arraylist size
-            int nSuits = Card.Suit.values().length;
+            int nSuits = Suit.values().length;
             canAdd     = canAdd && (nCards < nSuits);
         }
         else {
@@ -88,7 +90,7 @@ class FaceMeld
     
     // Checks all necessary conditions to play a meld. In order these are:
     // All the given cards are different, the meld doesn't already exist, and 
-    // that the cards selected are a mix of round cards and viable face cards.
+    // that the cards selected are a mix of round cards and viable rank cards.
     public boolean canPlay(CardBank hand, Card[] cards)
     {
         boolean canPlay = allCardsDifferent(cards) && meld_.size() == 0;
@@ -101,7 +103,7 @@ class FaceMeld
         return canPlay;
     }
     
-    // Checks that the card is a round card or has the appropriate face for the
+    // Checks that the card is a round card or has the appropriate rank for the
     // meld.
     private boolean isViableToAdd(Card card)
     {
@@ -110,7 +112,7 @@ class FaceMeld
         if (isRoundCard(card))
             isViableToAdd = true;
         else
-            isViableToAdd = card.getFace() == face_;
+            isViableToAdd = card.getRank() == rank_;
         
         return isViableToAdd;
     }
@@ -138,6 +140,6 @@ class FaceMeld
     
     private boolean isRoundCard(Card card)
     {
-        return card.getFace() == roundFace_;
+        return card.getRank() == roundRank_;
     }
 }

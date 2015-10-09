@@ -1,25 +1,27 @@
-package cardgame.acestokings;
+package cardgame.games.acestokings.melds;
 
-import cardgame.Card;
-import cardgame.CardBank;
+import cardgame.card.Card;
+import cardgame.card.Rank;
+import cardgame.card.Suit;
+import cardgame.card.CardBank;
 
-class RunMeld
+public class RunMeld
 {
-    private Card.Suit suit_;
-    private Card.Face roundFace_;
-    private Card[]    meld_;
+    private Suit   suit_;
+    private Rank   roundRank_;
+    private Card[] meld_;
     
     // Constructor
-    public RunMeld(Card.Suit suit, Card.Face roundFace)
+    public RunMeld(Suit suit, Rank roundRank)
     {
-        int nFaces = Card.Face.values().length;
+        int nRanks = Rank.values().length;
         suit_      = suit;
-        roundFace_ = roundFace;
-        meld_      = new Card[nFaces];
+        roundRank_ = roundRank;
+        meld_      = new Card[nRanks];
     }
     
     // Accessors
-    public Card.Suit getMeldType()
+    public Suit getMeldType()
     {
         return suit_;
     }
@@ -111,7 +113,7 @@ class RunMeld
         }
         else {
             isValidDestination = (destinationIndex ==
-                                  card.getFace().getValue() - 1);
+                                  card.getRank().getValue() - 1);
         }
         
         isViableToAdd = isValidSuit && isValidDestination;
@@ -126,22 +128,22 @@ class RunMeld
     {
         int     availableSlots   = meld_.length - initialMeldIndex;
         boolean isViableRun      = cards.length < availableSlots;
-        int     previousCardFace = initialMeldIndex + 1; // Face value = index + 1
-        int     currentCardFace;
+        int     previousCardRank = initialMeldIndex + 1; // Rank value = index + 1
+        int     currentCardRank;
         
         for (int i = 1; i < cards.length; i++) {
             Card testCard = cards[i];
             
             if (isRoundCard(testCard)) {
-                currentCardFace = previousCardFace + 1;
+                currentCardRank = previousCardRank + 1;
             }
             else {
-                currentCardFace = testCard.getFace().getValue();
-                isViableRun     = isViableRun && (currentCardFace -
-                                                  previousCardFace == 1);
+                currentCardRank = testCard.getRank().getValue();
+                isViableRun     = isViableRun && (currentCardRank -
+                                                  previousCardRank == 1);
             }
             
-            previousCardFace = currentCardFace;
+            previousCardRank = currentCardRank;
         }
         
         return isViableRun;
@@ -170,6 +172,6 @@ class RunMeld
     
     private boolean isRoundCard(Card card)
     {
-        return card.getFace() == roundFace_;
+        return card.getRank() == roundRank_;
     }
 }

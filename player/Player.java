@@ -1,6 +1,7 @@
-package cardgame;
+package cardgame.player;
 
 import java.util.ArrayList;
+import cardgame.card.CardBank;
 
 public class Player
 {

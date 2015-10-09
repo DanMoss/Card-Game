@@ -1,6 +1,6 @@
-package cardgame.acestokings;
+package cardgame.games.acestokings;
 
-import cardgame.PlayerIO;
+import cardgame.player.PlayerIO;
 
 enum PlayerChoice
 {
@@ -9,7 +9,7 @@ enum PlayerChoice
     END_TURN  (Type.TURN),
     
     RUN      (Type.DESTINATION),
-    SAME_FACE(Type.DESTINATION);
+    SAME_RANK(Type.DESTINATION);
     
     enum Type
     {

@@ -1,9 +1,9 @@
-package cardgame;
+package cardgame.player;
 
 public class Points
 {
-    private int    amount_;
-    private int    minAmount_;
+    private int       amount_;
+    private final int minAmount_;
     
     // Constructors
     public Points(int amount, int minAmount)
@@ -26,7 +26,7 @@ public class Points
     // Other methods
     public void add(int amount)
     {
-        int totalPoints = getAmount() + amount;
-        setAmount(totalPoints);
+        int total = getAmount() + amount;
+        setAmount(total);
     }
 }

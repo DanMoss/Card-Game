@@ -1,4 +1,4 @@
-package cardgame;
+package cardgame.player;
 
 public interface PlayerIO
 {

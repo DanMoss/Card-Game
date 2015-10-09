@@ -1,11 +1,14 @@
-package cardgame.acestokings;
+package cardgame.games.acestokings;
 
 import java.util.ArrayList;
-import cardgame.Deck;
-import cardgame.Player;
-import cardgame.PlayerIO;
-import cardgame.CardBank;
-import cardgame.Card;
+import cardgame.card.Deck;
+import cardgame.player.Player;
+import cardgame.player.PlayerIO;
+import cardgame.card.CardBank;
+import cardgame.card.Card;
+import cardgame.card.Rank;
+import cardgame.card.Suit;
+import cardgame.games.acestokings.melds.*;
 
 class Turn
 {
@@ -13,22 +16,22 @@ class Turn
     
     private final PlayerIO   playerIO_;
     private final CardBank   hand_;
-    private final Card.Face  roundFace_;
+    private final Rank       roundRank_;
     private final Deck       deck_;
     private final CardBank   discardPile_;
-    private final FaceMeld[] faceMelds_;
+    private final RankMeld[] rankMelds_;
     private final RunMeld[]  runMelds_;
     
     // Constructor
-    public Turn(Player player, Card.Face roundFace, Deck deck,
-                CardBank discardPile, FaceMeld[] faceMelds, RunMeld[] runMelds)
+    public Turn(Player player, Rank roundRank, Deck deck,
+                CardBank discardPile, RankMeld[] rankMelds, RunMeld[] runMelds)
     {
         playerIO_    = player.getPlayerIO();
         hand_        = player.findCardBank(Round.PLAYER_HAND);
-        roundFace_   = roundFace;
+        roundRank_   = roundRank;
         deck_        = deck;
         discardPile_ = discardPile;
-        faceMelds_   = faceMelds;
+        rankMelds_   = rankMelds;
         runMelds_    = runMelds;
     }
     
@@ -123,7 +126,7 @@ class Turn
         throws RuntimeException
     {
         String message = "Would you like to play to a run of cards of the "
-                       + "same suit, or a set of cards of the same face?";
+                       + "same suit, or a set of cards of the same rank?";
         playerIO_.sendMessage(message);
         PlayerChoice destination = PlayerChoice.makeChoice(playerIO_,
                                        PlayerChoice.Type.DESTINATION);
@@ -136,8 +139,8 @@ class Turn
                 playOneToRun(card);
                 break;
             
-            case SAME_FACE:
-                playOneToSameFace(card);
+            case SAME_RANK:
+                playOneToSameRank(card);
                 break;
             
             default:
@@ -151,7 +154,7 @@ class Turn
         throws RuntimeException
     {
         String message = "Would you like to play to a run of cards of the "
-                       + "same suit, or a set of cards of the same face?";
+                       + "same suit, or a set of cards of the same rank?";
         playerIO_.sendMessage(message);
         PlayerChoice destination = PlayerChoice.makeChoice(playerIO_,
                                        PlayerChoice.Type.DESTINATION);
@@ -168,8 +171,8 @@ class Turn
                 playThreeToRun(cards);
                 break;
             
-            case SAME_FACE:
-                playThreeToSameFace(cards);
+            case SAME_RANK:
+                playThreeToSameRank(cards);
                 break;
             
             default:
@@ -181,14 +184,14 @@ class Turn
     // Attempts to play a card to a run of cards
     private void playOneToRun(Card card)
     {
-        Card.Face face        = card.getFace();
-        Card.Suit suit        = card.getSuit();
-        boolean   isRoundCard = face == roundFace_;
+        Rank rank        = card.getRank();
+        Suit suit        = card.getSuit();
+        boolean   isRoundCard = rank == roundRank_;
         
-        face = isRoundCard ? chooseFace() : face;
+        rank = isRoundCard ? chooseRank() : rank;
         suit = isRoundCard ? chooseSuit() : suit;
         
-        int     index      = face.getValue() - 1;
+        int     index      = rank.getValue() - 1;
         RunMeld meld       = runMelds_[suit.getValue() - 1];
         boolean isPlayable = meld.canAdd(hand_, card, index);
         
@@ -201,14 +204,14 @@ class Turn
     // Attempts to play three cards as a run of cards
     private void playThreeToRun(Card[] cards)
     {
-        Card.Face firstFace   = cards[0].getFace();
-        Card.Suit firstSuit   = cards[0].getSuit();
-        boolean   isRoundCard = firstFace == roundFace_;
+        Rank firstRank   = cards[0].getRank();
+        Suit firstSuit   = cards[0].getSuit();
+        boolean   isRoundCard = firstRank == roundRank_;
         
-        firstFace = isRoundCard ? chooseFace() : firstFace;
+        firstRank = isRoundCard ? chooseRank() : firstRank;
         firstSuit = isRoundCard ? chooseSuit() : firstSuit;
         
-        int     index      = firstFace.getValue() - 1;
+        int     index      = firstRank.getValue() - 1;
         RunMeld meld       = runMelds_[firstSuit.getValue() - 1];
         boolean isPlayable = meld.canPlay(hand_, cards, index);
         
@@ -218,15 +221,15 @@ class Turn
             playerIO_.sendMessage("Invalid move.");
     }
     
-    // Attempts to play a card to a set of card with the same face
-    private void playOneToSameFace(Card card)
+    // Attempts to play a card to a set of card with the same rank
+    private void playOneToSameRank(Card card)
     {
-        Card.Face face        = card.getFace();
-        boolean   isRoundCard = face == roundFace_;
+        Rank rank        = card.getRank();
+        boolean   isRoundCard = rank == roundRank_;
         
-        face = isRoundCard ? chooseFace() : face;
+        rank = isRoundCard ? chooseRank() : rank;
         
-        FaceMeld meld       = faceMelds_[face.getValue() - 1];
+        RankMeld meld       = rankMelds_[rank.getValue() - 1];
         boolean  isPlayable = meld.canAdd(hand_, card);
         
         if (isPlayable)
@@ -235,15 +238,15 @@ class Turn
             playerIO_.sendMessage("Invalid move.");
     }
     
-    // Attempts to play three cards as a set of cards with the same face
-    private void playThreeToSameFace(Card[] cards)
+    // Attempts to play three cards as a set of cards with the same rank
+    private void playThreeToSameRank(Card[] cards)
     {
-        Card.Face firstFace   = cards[0].getFace();
-        boolean   isRoundCard = firstFace == roundFace_;
+        Rank firstRank   = cards[0].getRank();
+        boolean   isRoundCard = firstRank == roundRank_;
         
-        firstFace = isRoundCard ? chooseFace() : firstFace;
+        firstRank = isRoundCard ? chooseRank() : firstRank;
         
-        FaceMeld meld       = faceMelds_[firstFace.getValue() - 1];
+        RankMeld meld       = rankMelds_[firstRank.getValue() - 1];
         boolean  isPlayable = meld.canPlay(hand_, cards);
         
         if (isPlayable)
@@ -253,21 +256,21 @@ class Turn
     }
     
     // Methods for managing round cards
-    // Chooses a face for a round card to mimic
-    private Card.Face chooseFace()
+    // Chooses a rank for a round card to mimic
+    private Rank chooseRank()
     {
         String message = "You have chosen to play a round card. Please select "
-                       + "a face for this card to mimic.";
+                       + "a rank for this card to mimic.";
         playerIO_.sendMessage(message);
-        return Selector.select(playerIO_, Card.Face.values());
+        return Selector.select(playerIO_, Rank.values());
     }
     
     // Chooses a suit for a round card to mimic
-    private Card.Suit chooseSuit()
+    private Suit chooseSuit()
     {
         String message = "You have chosen to play a round card. Please select "
                        + "a suit for this card to mimic.";
         playerIO_.sendMessage(message);
-        return Selector.select(playerIO_, Card.Suit.values());
+        return Selector.select(playerIO_, Suit.values());
     }
 }

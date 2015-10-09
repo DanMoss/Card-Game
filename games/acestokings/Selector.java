@@ -1,6 +1,6 @@
-package cardgame.acestokings;
+package cardgame.games.acestokings;
 
-import cardgame.PlayerIO;
+import cardgame.player.PlayerIO;
 
 class Selector
 {

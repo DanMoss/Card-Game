@@ -1,10 +1,13 @@
-package cardgame.acestokings;
+package cardgame.games.acestokings;
 
-import cardgame.Player;
-import cardgame.CardBank;
-import cardgame.Deck;
-import cardgame.Card;
-import cardgame.Points;
+import cardgame.player.Player;
+import cardgame.card.CardBank;
+import cardgame.card.Deck;
+import cardgame.card.Card;
+import cardgame.card.Rank;
+import cardgame.card.Suit;
+import cardgame.player.Points;
+import cardgame.games.acestokings.melds.*;
 import java.util.ArrayList;
 
 class Round
@@ -17,22 +20,22 @@ class Round
     private static final int ROUND_CARD_VALUE   = 15;
     
     private final ArrayList<Player> players_;
-    private final Card.Face         roundFace_;
+    private final Rank         roundRank_;
     private final Deck              deck_;
     private final CardBank          discardPile_;
-    private final FaceMeld[]        faceMelds_;
+    private final RankMeld[]        rankMelds_;
     private final RunMeld[]         runMelds_;
     
     // Constructor
-    public Round(ArrayList<Player> players, Card.Face roundFace)
+    public Round(ArrayList<Player> players, Rank roundRank)
     {
         players_     = players;
-        roundFace_   = roundFace;
+        roundRank_   = roundRank;
         deck_        = new Deck(DECK);
-        int nFaces   = Card.Face.values().length;
-        int nSuits   = Card.Suit.values().length;
-        discardPile_ = new CardBank(DISCARD_PILE, nFaces * nSuits);
-        faceMelds_   = new FaceMeld[nFaces];
+        int nRanks   = Rank.values().length;
+        int nSuits   = Suit.values().length;
+        discardPile_ = new CardBank(DISCARD_PILE, nRanks * nSuits);
+        rankMelds_   = new RankMeld[nRanks];
         runMelds_    = new RunMeld[nSuits];
     }
     
@@ -51,14 +54,14 @@ class Round
     private void createMelds()
     {
         int i = 0;
-        for (Card.Face face : Card.Face.values()) {
-            faceMelds_[i] = new FaceMeld(face, roundFace_);
+        for (Rank rank : Rank.values()) {
+            rankMelds_[i] = new RankMeld(rank, roundRank_);
             i++;
         }
         
         int j = 0;
-        for (Card.Suit suit : Card.Suit.values()) {
-            runMelds_[j] = new RunMeld(suit, roundFace_);
+        for (Suit suit : Suit.values()) {
+            runMelds_[j] = new RunMeld(suit, roundRank_);
             j++;
         }
     }
@@ -83,7 +86,7 @@ class Round
     // Finds the players who plays first
     private int findStartingPlayer()
     {
-        int roundNumber    = roundFace_.getValue();
+        int roundNumber    = roundRank_.getValue();
         // Correcting for player 0 to play first in the first round.
         int startingPlayer = (roundNumber - 1) % players_.size();
         
@@ -97,8 +100,8 @@ class Round
         int     currentPlayer = startingPlayer;
         do {
             Player p    = players_.get(currentPlayer);
-            Turn   turn = new Turn(p, roundFace_, deck_, discardPile_,
-                                   faceMelds_, runMelds_);
+            Turn   turn = new Turn(p, roundRank_, deck_, discardPile_,
+                                   rankMelds_, runMelds_);
             turn.play();
             fillDeckIfNecessary();
             roundOver     = p.findCardBank(PLAYER_HAND).isEmpty();
@@ -124,11 +127,11 @@ class Round
             CardBank hand   = p.findCardBank(PLAYER_HAND);
             
             for (int j = 0; j < hand.size(); j++) {
-                Card.Face face = hand.getCard(j).getFace();
-                if (face == roundFace_)
+                Rank rank = hand.getCard(j).getRank();
+                if (rank == roundRank_)
                     points += ROUND_CARD_VALUE;
                 else
-                    points += face.getValue();
+                    points += rank.getValue();
             }
             p.getPoints().add(points);
         }
