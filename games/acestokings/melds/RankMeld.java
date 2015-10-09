@@ -6,7 +6,7 @@ import cardgame.card.Suit;
 import cardgame.card.Card;
 import cardgame.card.CardBank;
 
-public class RankMeld
+public class RankMeld extends AbstractMeld
 {
     private Rank            rank_;
     private Rank            roundRank_;

@@ -1,27 +1,9 @@
-package cardgame.acestokings.melds;
+package cardgame.games.acestokings.melds;
 
-import cardgame.Card;
+import cardgame.card.Rank;
 
-class AbstractMeld<Type>
+class AbstractMeld
 {
     public static final int MELD_PLAY_SIZE = 3;
-    
-    private Type      meldType_;
-    private Card.Face roundFace_;
-    
-    private AbstractMeld(Type meldType, Card.Face roundFace)
-    {
-        meldType_  = meldType;
-        roundFace_ = roundFace;
-    }
-    
-    public Type getMeldType()
-    {
-        return meldType_;
-    }
-    
-    public static void main(String[] args)
-    {
-        AbstractMeld<Card.Face> test = new AbstractMeld<Card.Face>(Card.Face.ACE, Card.Face.ACE);
-    }
+    // Work needs to be done here to connect the two classes
 }

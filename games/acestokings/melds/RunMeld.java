@@ -5,7 +5,7 @@ import cardgame.card.Rank;
 import cardgame.card.Suit;
 import cardgame.card.CardBank;
 
-public class RunMeld
+public class RunMeld extends AbstractMeld
 {
     private Suit   suit_;
     private Rank   roundRank_;
