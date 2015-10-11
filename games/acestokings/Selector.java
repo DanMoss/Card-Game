@@ -2,7 +2,7 @@ package cardgame.games.acestokings;
 
 import cardgame.player.PlayerIO;
 
-class Selector
+public class Selector
 {
     // Constructor
     private Selector()

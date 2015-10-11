@@ -12,8 +12,7 @@ import cardgame.games.acestokings.melds.*;
 
 class Turn
 {
-    private static final int MELD_SIZE = 3;
-    
+    private final Player     player_;
     private final PlayerIO   playerIO_;
     private final CardBank   hand_;
     private final Rank       jokerRank_;
@@ -26,8 +25,9 @@ class Turn
     public Turn(Player player, Rank jokerRank, Deck deck,
                 CardBank discardPile, RankMeld[] rankMelds, RunMeld[] runMelds)
     {
+        player_      = player;
         playerIO_    = player.getPlayerIO();
-        hand_        = player.findCardBank(Round.PLAYER_HAND);
+        hand_        = player.findCardBank(CardBanks.HAND);
         jokerRank_   = jokerRank;
         deck_        = deck;
         discardPile_ = discardPile;
@@ -39,8 +39,8 @@ class Turn
     // Starts play of the turn
     public void play()
     {
-        boolean turnOver;
         draw();
+        boolean turnOver;
         do {
             turnOver = playCards();
         } while (!turnOver);
@@ -67,192 +67,64 @@ class Turn
         discardPile_.add(0, card);
     }
     
-    // Methods for managing the playing of cards from the hand
     // Offers the player a choice of what to do this turn
     private boolean playCards()
         throws RuntimeException
     {
         playerIO_.sendMessage("What would you like to do?");
-        PlayerChoice decision = PlayerChoice.makeChoice(playerIO_,
-                                    PlayerChoice.Type.TURN);
-        boolean      turnOver;
+        TurnOption action = Selector.select(playerIO_, TurnOption.values());
+        boolean    turnOver;
         
-        switch (decision) {
-            case PLAY_ONE:
-                // The player must still be able to discard afterwards
-                boolean canPlayOne = hand_.size() > 1;
-                
-                if (canPlayOne) {
-                    playOne();
-                }
-                else {
-                    String message = "You must be able to discard to end your "
-                                   + "turn!";
-                    playerIO_.sendMessage(message);
-                }
-                
-                turnOver = false;
-                break;
-            
-            case PLAY_THREE:
-                boolean canPlayThree = hand_.size() > MELD_SIZE;
-                
-                if (canPlayThree) {
-                    playThree();
-                }
-                else {
-                    String message = "You must be able to discard to end your "
-                                   + "turn!";
-                    playerIO_.sendMessage(message);
-                }
-                
-                turnOver = false;
-                break;
-            
-            case END_TURN:
-                turnOver = true;
-                break;
-            
-            default:
-                throw new RuntimeException("Unexpected turn action: "
-                                           + decision);
+        if (action == TurnOption.END_TURN) {
+            turnOver = true;
+        }
+        else {
+            Card[]       cards = chooseCards(action.getNCardsToPlay());
+            AbstractMeld meld  = findDestinationMeld(cards[0]);
+            meld.play(player_, cards);
+            turnOver = false;
         }
         
         return turnOver;
     }
     
-    // Chooses a card and calls the appropriate method to play it
-    private void playOne()
+    // Finds which meld the player wants to target with {@code firstCard}
+    private AbstractMeld findDestinationMeld(Card firstCard)
         throws RuntimeException
     {
-        String message = "Would you like to play to a run of cards of the "
-                       + "same suit, or a set of cards of the same rank?";
-        playerIO_.sendMessage(message);
-        PlayerChoice destination = PlayerChoice.makeChoice(playerIO_,
-                                       PlayerChoice.Type.DESTINATION);
+        playerIO_.sendMessage("Where would you like to play to?");
+        MeldType type    = Selector.select(playerIO_, MeldType.values());
+        boolean  isJoker = firstCard.getRank() == jokerRank_;
+        AbstractMeld meld;
         
-        playerIO_.sendMessage("Please select a card.");
-        Card card = Selector.select(playerIO_, hand_.toArray());
-        
-        switch (destination) {
-            case RUN:
-                playOneToRun(card);
+        switch (type) {
+            case RANK:
+                Rank meldRank = isJoker ? chooseRank() : firstCard.getRank();
+                meld = rankMelds_[meldRank.getValue() - 1];
                 break;
             
-            case SAME_RANK:
-                playOneToSameRank(card);
+            case RUN:
+                Suit meldSuit = isJoker ? chooseSuit() : firstCard.getSuit();
+                meld  = runMelds_[meldSuit.getValue() - 1];
                 break;
             
             default:
-                throw new RuntimeException("Unexpected destination: "
-                                           + destination);
+                throw new RuntimeException("Unexpected MeldType: " + type);
         }
+        
+        return meld;
     }
     
-    // Chooses three cards and calls the appropriate method to play 
-    private void playThree()
-        throws RuntimeException
+    // Promps the player to choose {@code nCardsToPlay} from their hand, though
+    // not necessarily different cards
+    private Card[] chooseCards(int nCardsToPlay)
     {
-        String message = "Would you like to play to a run of cards of the "
-                       + "same suit, or a set of cards of the same rank?";
-        playerIO_.sendMessage(message);
-        PlayerChoice destination = PlayerChoice.makeChoice(playerIO_,
-                                       PlayerChoice.Type.DESTINATION);
+        Card[] cards = new Card[nCardsToPlay];
         
-        playerIO_.sendMessage("Please select three cards.");
-        Card[] cards = new Card[MELD_SIZE];
-        
-        for (int i = 0; i < MELD_SIZE; i++) {
+        for (int i = 0; i < nCardsToPlay; i++)
             cards[i] = Selector.select(playerIO_, hand_.toArray());
-        }
         
-        switch (destination) {
-            case RUN:
-                playThreeToRun(cards);
-                break;
-            
-            case SAME_RANK:
-                playThreeToSameRank(cards);
-                break;
-            
-            default:
-                throw new RuntimeException("Unexpected destination: "
-                                           + destination);
-        }
-    }
-    
-    // Attempts to play a card to a run of cards
-    private void playOneToRun(Card card)
-    {
-        Rank rank        = card.getRank();
-        Suit suit        = card.getSuit();
-        boolean   isJoker = rank == jokerRank_;
-        
-        rank = isJoker ? chooseRank() : rank;
-        suit = isJoker ? chooseSuit() : suit;
-        
-        int     index      = rank.getValue() - 1;
-        RunMeld meld       = runMelds_[suit.getValue() - 1];
-        boolean isPlayable = meld.canAdd(hand_, card, index);
-        
-        if (isPlayable)
-            meld.add(hand_, card, index);
-        else
-            playerIO_.sendMessage("Invalid move.");
-    }
-    
-    // Attempts to play three cards as a run of cards
-    private void playThreeToRun(Card[] cards)
-    {
-        Rank firstRank   = cards[0].getRank();
-        Suit firstSuit   = cards[0].getSuit();
-        boolean   isJoker = firstRank == jokerRank_;
-        
-        firstRank = isJoker ? chooseRank() : firstRank;
-        firstSuit = isJoker ? chooseSuit() : firstSuit;
-        
-        int     index      = firstRank.getValue() - 1;
-        RunMeld meld       = runMelds_[firstSuit.getValue() - 1];
-        boolean isPlayable = meld.canPlay(hand_, cards, index);
-        
-        if (isPlayable)
-            meld.play(hand_, cards, index);
-        else
-            playerIO_.sendMessage("Invalid move.");
-    }
-    
-    // Attempts to play a card to a set of card with the same rank
-    private void playOneToSameRank(Card card)
-    {
-        Rank rank        = card.getRank();
-        boolean   isJoker = rank == jokerRank_;
-        
-        rank = isJoker ? chooseRank() : rank;
-        
-        RankMeld meld       = rankMelds_[rank.getValue() - 1];
-        boolean  isPlayable = meld.canAdd(hand_, card);
-        
-        if (isPlayable)
-            meld.add(hand_, card);
-        else
-            playerIO_.sendMessage("Invalid move.");
-    }
-    
-    // Attempts to play three cards as a set of cards with the same rank
-    private void playThreeToSameRank(Card[] cards)
-    {
-        Rank firstRank   = cards[0].getRank();
-        boolean   isJoker = firstRank == jokerRank_;
-        
-        firstRank = isJoker ? chooseRank() : firstRank;
-        
-        RankMeld meld       = rankMelds_[firstRank.getValue() - 1];
-        boolean  isPlayable = meld.canPlay(hand_, cards);
-        
-        if (isPlayable)
-            meld.play(hand_, cards);
-        else
-            playerIO_.sendMessage("Invalid move.");
+        return cards;
     }
     
     // Methods for managing jokers
