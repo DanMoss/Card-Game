@@ -16,19 +16,19 @@ class Turn
     
     private final PlayerIO   playerIO_;
     private final CardBank   hand_;
-    private final Rank       roundRank_;
+    private final Rank       jokerRank_;
     private final Deck       deck_;
     private final CardBank   discardPile_;
     private final RankMeld[] rankMelds_;
     private final RunMeld[]  runMelds_;
     
     // Constructor
-    public Turn(Player player, Rank roundRank, Deck deck,
+    public Turn(Player player, Rank jokerRank, Deck deck,
                 CardBank discardPile, RankMeld[] rankMelds, RunMeld[] runMelds)
     {
         playerIO_    = player.getPlayerIO();
         hand_        = player.findCardBank(Round.PLAYER_HAND);
-        roundRank_   = roundRank;
+        jokerRank_   = jokerRank;
         deck_        = deck;
         discardPile_ = discardPile;
         rankMelds_   = rankMelds;
@@ -186,10 +186,10 @@ class Turn
     {
         Rank rank        = card.getRank();
         Suit suit        = card.getSuit();
-        boolean   isRoundCard = rank == roundRank_;
+        boolean   isJoker = rank == jokerRank_;
         
-        rank = isRoundCard ? chooseRank() : rank;
-        suit = isRoundCard ? chooseSuit() : suit;
+        rank = isJoker ? chooseRank() : rank;
+        suit = isJoker ? chooseSuit() : suit;
         
         int     index      = rank.getValue() - 1;
         RunMeld meld       = runMelds_[suit.getValue() - 1];
@@ -206,10 +206,10 @@ class Turn
     {
         Rank firstRank   = cards[0].getRank();
         Suit firstSuit   = cards[0].getSuit();
-        boolean   isRoundCard = firstRank == roundRank_;
+        boolean   isJoker = firstRank == jokerRank_;
         
-        firstRank = isRoundCard ? chooseRank() : firstRank;
-        firstSuit = isRoundCard ? chooseSuit() : firstSuit;
+        firstRank = isJoker ? chooseRank() : firstRank;
+        firstSuit = isJoker ? chooseSuit() : firstSuit;
         
         int     index      = firstRank.getValue() - 1;
         RunMeld meld       = runMelds_[firstSuit.getValue() - 1];
@@ -225,9 +225,9 @@ class Turn
     private void playOneToSameRank(Card card)
     {
         Rank rank        = card.getRank();
-        boolean   isRoundCard = rank == roundRank_;
+        boolean   isJoker = rank == jokerRank_;
         
-        rank = isRoundCard ? chooseRank() : rank;
+        rank = isJoker ? chooseRank() : rank;
         
         RankMeld meld       = rankMelds_[rank.getValue() - 1];
         boolean  isPlayable = meld.canAdd(hand_, card);
@@ -242,9 +242,9 @@ class Turn
     private void playThreeToSameRank(Card[] cards)
     {
         Rank firstRank   = cards[0].getRank();
-        boolean   isRoundCard = firstRank == roundRank_;
+        boolean   isJoker = firstRank == jokerRank_;
         
-        firstRank = isRoundCard ? chooseRank() : firstRank;
+        firstRank = isJoker ? chooseRank() : firstRank;
         
         RankMeld meld       = rankMelds_[firstRank.getValue() - 1];
         boolean  isPlayable = meld.canPlay(hand_, cards);
@@ -255,21 +255,21 @@ class Turn
             playerIO_.sendMessage("Invalid move.");
     }
     
-    // Methods for managing round cards
-    // Chooses a rank for a round card to mimic
+    // Methods for managing jokers
+    // Chooses a rank for a joker to mimic
     private Rank chooseRank()
     {
-        String message = "You have chosen to play a round card. Please select "
-                       + "a rank for this card to mimic.";
+        String message = "You have chosen to play a joker. Please select a "
+                       + "rank for this card to mimic.";
         playerIO_.sendMessage(message);
         return Selector.select(playerIO_, Rank.values());
     }
     
-    // Chooses a suit for a round card to mimic
+    // Chooses a suit for a joker to mimic
     private Suit chooseSuit()
     {
-        String message = "You have chosen to play a round card. Please select "
-                       + "a suit for this card to mimic.";
+        String message = "You have chosen to play a joker. Please select a "
+                       + "suit for this card to mimic.";
         playerIO_.sendMessage(message);
         return Selector.select(playerIO_, Suit.values());
     }

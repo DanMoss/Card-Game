@@ -17,8 +17,8 @@ class AcesToKings
     // Other methods
     public void play()
     {
-        for (Rank roundRank : Rank.values()) {
-            Round round = new Round(players_, roundRank);
+        for (Rank jokerRank : Rank.values()) {
+            Round round = new Round(players_, jokerRank);
             round.play();
         }
     }
