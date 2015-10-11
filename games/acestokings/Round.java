@@ -10,13 +10,9 @@ import cardgame.player.Points;
 import cardgame.games.acestokings.melds.*;
 import java.util.ArrayList;
 
-public class Round //public is temporary until the below are moved
+class Round
 {
-    public static final String DECK         = "Deck"; // Move to their own class
-    public static final String DISCARD_PILE = "Discard Pile";
-    public static final String PLAYER_HAND  = "Hand";
-    
-    private static final int STARTING_HAND_SIZE = 7;
+    private static final int HAND_SIZE = 7;
     private static final int JOKER_CARD_VALUE   = 15;
     
     private final ArrayList<Player> players_;
@@ -31,10 +27,10 @@ public class Round //public is temporary until the below are moved
     {
         players_     = players;
         jokerRank_   = jokerRank;
-        deck_        = new Deck(DECK);
+        deck_        = new Deck(CardBanks.DECK);
         int nRanks   = Rank.values().length;
         int nSuits   = Suit.values().length;
-        discardPile_ = new CardBank(DISCARD_PILE, nRanks * nSuits);
+        discardPile_ = new CardBank(CardBanks.DISCARD_PILE, nRanks * nSuits);
         rankMelds_   = new RankMeld[nRanks];
         runMelds_    = new RunMeld[nSuits];
     }
@@ -66,15 +62,15 @@ public class Round //public is temporary until the below are moved
         }
     }
     
-    // Deals STARTING_HAND_SIZE cards to each player, then takes the top card
+    // Deals HAND_SIZE cards to each player, then takes the top card
     // of the deck and places it on the discard pile.
     private void deal()
     {
         deck_.shuffle();
         for (int i = 0; i < players_.size(); i++) {
             Player   p    = players_.get(i);
-            CardBank hand = new CardBank(PLAYER_HAND, STARTING_HAND_SIZE + 1);
-            hand.transferFrom(deck_, 0, STARTING_HAND_SIZE);
+            CardBank hand = new CardBank(CardBanks.HAND, HAND_SIZE + 1); // Revisit this
+            hand.transferFrom(deck_, 0, HAND_SIZE);
             
             ArrayList<CardBank> pCardBanks = p.getCardBanks();
             pCardBanks.clear();
@@ -104,7 +100,7 @@ public class Round //public is temporary until the below are moved
                                    rankMelds_, runMelds_);
             turn.play();
             fillDeckIfNecessary();
-            roundOver     = p.findCardBank(PLAYER_HAND).isEmpty();
+            roundOver     = p.findCardBank(CardBanks.HAND).isEmpty();
             currentPlayer = (currentPlayer + 1) % players_.size();
         } while (!roundOver);
     }
@@ -124,7 +120,7 @@ public class Round //public is temporary until the below are moved
         for (int i = 0; i < players_.size(); i++) {
             int      points = 0;
             Player   p      = players_.get(i);
-            CardBank hand   = p.findCardBank(PLAYER_HAND);
+            CardBank hand   = p.findCardBank(CardBanks.HAND);
             
             for (int j = 0; j < hand.size(); j++) {
                 Rank rank = hand.getCard(j).getRank();

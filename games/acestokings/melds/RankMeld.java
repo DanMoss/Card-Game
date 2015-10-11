@@ -1,66 +1,64 @@
 package cardgame.games.acestokings.melds;
 
 import java.util.ArrayList;
-import cardgame.card.Rank;
 import cardgame.card.Suit;
+import cardgame.card.Rank;
 import cardgame.card.Card;
 import cardgame.card.CardBank;
+import cardgame.player.Player;
+import cardgame.games.acestokings.CardBanks;
 
 public class RankMeld extends AbstractMeld
 {
-    private Rank            rank_;
-    private Rank            roundRank_;
-    private ArrayList<Card> meld_;
-    private int             nRoundCards_;
+    private final int MELD_CAPACITY = Suit.values().length;
+    
+    private final Rank            meldRank_;
+    private final ArrayList<Card> meld_;
+    private       int             nJokers_;
     
     // Constructor
-    public RankMeld(Rank rank, Rank roundRank)
+    public RankMeld(Rank meldRank, Rank jokerRank)
     {
-        int nSuits   = Suit.values().length;
-        rank_        = rank;
-        roundRank_   = roundRank;
-        meld_        = new ArrayList<Card>(nSuits);
-        nRoundCards_ = 0;
+        super(jokerRank);
+        meldRank_ = meldRank;
+        meld_     = new ArrayList<Card>(MELD_CAPACITY);
+        nJokers_  = 0;
     }
     
-    // Accessors
-    public Rank getMeldType()
+    // Implementations of abstract methods
+    // Attempts to add {@code card} to an existing meld
+    protected boolean addCardToMeld(Player player, Card card)
     {
-        return rank_;
+        boolean canPlay = canPlaySingle(card);
+        if (canPlay)
+            place(player, card);
+        return canPlay;
     }
     
-    // Other methods
-    // Adds a single card to the meld and replaces a round card if necessary
-    // Note round cards are always placed at the front of the meld
-    public void add(CardBank hand, Card card)
+    // Attempts to play {@code cards} as a meld
+    protected boolean playMeld(Player player, Card... cards)
     {
-        if (isRoundCard(card)) {
-            meld_.add(0, card);
-            nRoundCards_++;
-        }
-        else {
-            if (nRoundCards_ > 0) {
-                hand.add(meld_.get(0));
-                meld_.remove(0);
-                nRoundCards_--;
-            }
-            
-            meld_.add(card);
+        boolean canPlay = canPlayMeld(cards);
+        if (canPlay)
+            place(player, cards);
+        return canPlay;
+    }
+    
+    // Places {@code cards}, picking up any jokers as necessary
+    private void place(Player player, Card... cards)
+    {
+        CardBank hand             = player.findCardBank(CardBanks.HAND);
+        int      nJokersToReplace = findNJokersToReplace(cards);
+        
+        for (int i = 1; i <= nJokersToReplace; i++) {
+            hand.add(meld_.remove(0));
+            nJokers_--;
         }
         
-        hand.discard(card);
-    }
-    
-    // Plays a set of cards with the same rank
-    // Note round cards are always placed at the front of the meld
-    public void play(CardBank hand, Card[] cards)
-    {
-        for (int i = 0; i < cards.length; i++) {
-            Card card = cards[i];
-            
-            if (isRoundCard(card)) {
+        for (Card card : cards) {
+            if (isJoker(card)) {
                 meld_.add(0, card);
-                nRoundCards_++;
+                nJokers_++;
             }
             else {
                 meld_.add(card);
@@ -70,76 +68,56 @@ public class RankMeld extends AbstractMeld
         }
     }
     
-    // Checks that the meld exists and if the card is appropriate for the meld
-    public boolean canAdd(CardBank hand, Card card)
+    // Validity checking methods
+    // Checks if {@code card} is playable as a single card
+    private boolean canPlaySingle(Card card)
     {
-        int     nCards = meld_.size();
-        boolean canAdd = nCards > 0;
-        
-        if (isRoundCard(card)) {
-            //  nSuits = Max arraylist size
-            int nSuits = Suit.values().length;
-            canAdd     = canAdd && (nCards < nSuits);
-        }
-        else {
-            canAdd = canAdd && isViableToAdd(card);
-        }
-        
-        return canAdd;
-    }
-    
-    // Checks all necessary conditions to play a meld. In order these are:
-    // All the given cards are different, the meld doesn't already exist, and 
-    // that the cards selected are a mix of round cards and viable rank cards.
-    public boolean canPlay(CardBank hand, Card[] cards)
-    {
-        boolean canPlay = allCardsDifferent(cards) && meld_.size() == 0;
-        
-        for (int i = 0; i < cards.length; i++) {
-            Card card = cards[i];
-            canPlay   = canPlay && isViableToAdd(card);
-        }
-        
+        boolean meldExists = meld_.size() >= MINIMUM_MELD_SIZE;
+        boolean canPlay    = meldExists && allCorrectRank(card);
+        canPlay            = canPlay    && hasSpace(card);
         return canPlay;
     }
     
-    // Checks that the card is a round card or has the appropriate rank for the
-    // meld.
-    private boolean isViableToAdd(Card card)
+    // Checks if {@code cards} are playable as a meld
+    private boolean canPlayMeld(Card... cards)
     {
-        boolean isViableToAdd;
-        
-        if (isRoundCard(card))
-            isViableToAdd = true;
-        else
-            isViableToAdd = card.getRank() == rank_;
-        
-        return isViableToAdd;
+        boolean canPlay = allCardsDifferent(cards);
+        canPlay = canPlay && allCorrectRank(cards);
+        canPlay = canPlay && hasSpace(cards);
+        return canPlay;
     }
     
-    // Checks that all of the cards given are different
-    private boolean allCardsDifferent(Card[] cards)
+    // Checks that {@code cards} are all of the correct rank for the meld
+    private boolean allCorrectRank(Card... cards)
     {
-        boolean allCardsDifferent = true;
-        boolean completedSearch;
-        int     nCards = cards.length;
-        
-        int i = 0;
-        do {
-            for (int j = i + 1; j < nCards; j++) {
-                if (cards[i].equals(cards[j]))
-                    allCardsDifferent = false;
-            }
-            
-            i++;
-            completedSearch = !allCardsDifferent || (i == nCards);
-        } while (!completedSearch);
-        
-        return allCardsDifferent;
+        boolean allCorrect = true;
+        for (Card card : cards) {
+            boolean singleCorrect = card.getRank() == meldRank_;
+            singleCorrect         = singleCorrect || isJoker(card);
+            allCorrect            = allCorrect    && singleCorrect;
+        }
+        return allCorrect;
     }
     
-    private boolean isRoundCard(Card card)
+    // Checks that there is space to play {@code cards}
+    private boolean hasSpace(Card... cards)
     {
-        return card.getRank() == roundRank_;
+        int     nJokersToReplace = findNJokersToReplace(cards);
+        int     endMeldSize      = meld_.size() + cards.length;
+        endMeldSize              = endMeldSize - nJokersToReplace;
+        boolean withinCapacity   = endMeldSize <= MELD_CAPACITY;
+        return withinCapacity;
+    }
+    
+    // Counts the number of jokers in {@code cards}
+    private int findNJokersToReplace(Card... cards)
+    {
+        int nNonJokers = 0;
+        for (Card card : cards) {
+            if (!isJoker(card))
+                nNonJokers++;
+        }
+        int nJokersToReplace = nNonJokers < nJokers_ ? nNonJokers : nJokers_;
+        return nJokersToReplace;
     }
 }
