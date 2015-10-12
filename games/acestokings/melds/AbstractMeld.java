@@ -1,13 +1,12 @@
 package cardgame.games.acestokings.melds;
 
+import java.util.ArrayList;
 import cardgame.card.Rank;
 import cardgame.card.Card;
-import cardgame.player.Player;
+import cardgame.card.CardBank;
 
-public abstract class AbstractMeld
+abstract class AbstractMeld
 {
-    public static final int MINIMUM_MELD_SIZE = 3;
-    
     private final Rank jokerRank_;
     
     // Constructor
@@ -16,44 +15,29 @@ public abstract class AbstractMeld
         jokerRank_ = jokerRank;
     }
     
-    // Attempts to play {@code cards}
-    // Future note: Look into the possibility of playing 2 single cards
-    public boolean play(Player player, Card... cards)
-    {
-        boolean cardsPlayed;
-        
-        if (cards.length == 1)
-            cardsPlayed = addCardToMeld(player, cards[0]);
-        else if (cards.length >= MINIMUM_MELD_SIZE)
-            cardsPlayed = playMeld(player, cards);
-        else
-            cardsPlayed = false;
-            
-        return cardsPlayed;
-    }
-    
     // Abstract methods
-    // Attempts to add {@code card} to an existing meld
-    protected abstract boolean addCardToMeld(Player player, Card card);
+    // Plays some card(s) to the meld
+    protected abstract void play(CardBank hand, PlayOption option);
     
-    // Attempts to play {@code cards} as a meld
-    protected abstract boolean playMeld(Player player, Card... cards);
+    // Appends {@code options} with plays that can be made with {@code card}
+    protected abstract void addCardPlays(ArrayList<PlayOption> options,
+                                         Card card);
+    
+    // Appends {@code options} with plays that can be made with {@code cards}
+    protected abstract void addMeldPlays(ArrayList<PlayOption> options,
+                                         Card... cards);
+    
+    @Override
+    public abstract String toString();
     
     // Other methods
-    // Checks that {@code cards} are all different
-    protected boolean allCardsDifferent(Card... cards)
+    // Appends {@code options} with plays that can be made with {@code cards}
+    void findPlayOptions(ArrayList<PlayOption> options, Card... cards)
     {
-        boolean allCardsDifferent = true;
-        int     nCards = cards.length;
-        
-        for (int i = 0; i < nCards; i++) {
-            for (int j = i + 1; j < nCards; j++) {
-                if (cards[i].equals(cards[j]))
-                    allCardsDifferent = false;
-            }
-        }
-        
-        return allCardsDifferent;
+        if (cards.length == 1)
+            addCardPlays(options, cards[0]);
+        else if (cards.length >= MeldsManager.MINIMUM_MELD_SIZE)
+            addMeldPlays(options, cards);
     }
     
     // Checks if {@code card} is a joker

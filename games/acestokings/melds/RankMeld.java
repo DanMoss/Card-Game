@@ -5,10 +5,8 @@ import cardgame.card.Suit;
 import cardgame.card.Rank;
 import cardgame.card.Card;
 import cardgame.card.CardBank;
-import cardgame.player.Player;
-import cardgame.games.acestokings.CardBanks;
 
-public class RankMeld extends AbstractMeld
+class RankMeld extends AbstractMeld
 {
     private final int MELD_CAPACITY = Suit.values().length;
     
@@ -17,7 +15,7 @@ public class RankMeld extends AbstractMeld
     private       int             nJokers_;
     
     // Constructor
-    public RankMeld(Rank meldRank, Rank jokerRank)
+    protected RankMeld(Rank meldRank, Rank jokerRank)
     {
         super(jokerRank);
         meldRank_ = meldRank;
@@ -26,75 +24,45 @@ public class RankMeld extends AbstractMeld
     }
     
     // Implementations of abstract methods
-    // Attempts to add {@code card} to an existing meld
-    protected boolean addCardToMeld(Player player, Card card)
+    // Plays some card(s) to the meld
+    protected void play(CardBank hand, PlayOption option)
     {
-        boolean canPlay = canPlaySingle(card);
+        Card[] cards = option.getCards();
+        place(hand, cards);
+    }
+    
+    // Appends {@code options} with plays that can be made with {@code card}
+    protected void addCardPlays(ArrayList<PlayOption> options, Card card)
+    {
+        boolean meldExists = meld_.size() >= MeldsManager.MINIMUM_MELD_SIZE;
+        boolean canPlay    = meldExists   && allCorrectRank(card);
+        canPlay            = canPlay      && hasSpace(card);
         if (canPlay)
-            place(player, card);
-        return canPlay;
+            addOption(options, card);
     }
     
-    // Attempts to play {@code cards} as a meld
-    protected boolean playMeld(Player player, Card... cards)
+    // Appends {@code options} with plays that can be made with {@code cards}
+    protected void addMeldPlays(ArrayList<PlayOption> options, Card... cards)
     {
-        boolean canPlay = canPlayMeld(cards);
+        boolean canPlay = hasSpace(cards) && allCorrectRank(cards);
         if (canPlay)
-            place(player, cards);
-        return canPlay;
+            addOption(options, cards);
     }
     
-    // Places {@code cards}, picking up any jokers as necessary
-    private void place(Player player, Card... cards)
+    public String toString()
     {
-        CardBank hand             = player.findCardBank(CardBanks.HAND);
-        int      nJokersToReplace = findNJokersToReplace(cards);
-        
-        for (int i = 1; i <= nJokersToReplace; i++) {
-            hand.add(meld_.remove(0));
-            nJokers_--;
-        }
-        
-        for (Card card : cards) {
-            if (isJoker(card)) {
-                meld_.add(0, card);
-                nJokers_++;
-            }
-            else {
-                meld_.add(card);
-            }
-            
-            hand.discard(card);
-        }
+        return "a set of " + meldRank_.getPlural();
     }
     
-    // Validity checking methods
-    // Checks if {@code card} is playable as a single card
-    private boolean canPlaySingle(Card card)
-    {
-        boolean meldExists = meld_.size() >= MINIMUM_MELD_SIZE;
-        boolean canPlay    = meldExists && allCorrectRank(card);
-        canPlay            = canPlay    && hasSpace(card);
-        return canPlay;
-    }
-    
-    // Checks if {@code cards} are playable as a meld
-    private boolean canPlayMeld(Card... cards)
-    {
-        boolean canPlay = allCardsDifferent(cards);
-        canPlay = canPlay && allCorrectRank(cards);
-        canPlay = canPlay && hasSpace(cards);
-        return canPlay;
-    }
-    
+    // Methods for checking meld conditions
     // Checks that {@code cards} are all of the correct rank for the meld
     private boolean allCorrectRank(Card... cards)
     {
         boolean allCorrect = true;
         for (Card card : cards) {
             boolean singleCorrect = card.getRank() == meldRank_;
-            singleCorrect         = singleCorrect || isJoker(card);
-            allCorrect            = allCorrect    && singleCorrect;
+            singleCorrect         = singleCorrect  || isJoker(card);
+            allCorrect            = allCorrect     && singleCorrect;
         }
         return allCorrect;
     }
@@ -109,7 +77,31 @@ public class RankMeld extends AbstractMeld
         return withinCapacity;
     }
     
-    // Counts the number of jokers in {@code cards}
+    // Other methods
+    // Places {@code cards}, picking up any jokers as necessary
+    // Note that jokers are always played to the start of the meld
+    private void place(CardBank hand, Card... cards)
+    {
+        int nJokersToReplace = findNJokersToReplace(cards);
+        
+        for (int i = 0; i < nJokersToReplace; i++) {
+            hand.add(meld_.remove(0));
+            nJokers_--;
+        }
+        
+        for (Card card : cards) {
+            if (isJoker(card)) {
+                meld_.add(0, card);
+                nJokers_++;
+            }
+            else {
+                meld_.add(card);
+            }
+            hand.discard(card);
+        }
+    }
+    
+    // Finds out how many jokers to pick up when playing {@code cards}
     private int findNJokersToReplace(Card... cards)
     {
         int nNonJokers = 0;
@@ -119,5 +111,12 @@ public class RankMeld extends AbstractMeld
         }
         int nJokersToReplace = nNonJokers < nJokers_ ? nNonJokers : nJokers_;
         return nJokersToReplace;
+    }
+    
+    // Appends {@code options} with a new option
+    private void addOption(ArrayList<PlayOption> options, Card... cards)
+    {
+        PlayOption option = new PlayOption(this, cards);
+        options.add(option);
     }
 }
