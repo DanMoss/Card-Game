@@ -93,9 +93,10 @@ class RunMeld extends AbstractMeld
     private boolean isARun(Card... cards)
     {
         boolean isARun = true;
-        for (int i = 1; i < cards.length; i++) {
+        int     nCards = cards.length;
+        for (int i = 1; i < nCards; i++)
             isARun = isARun && ranksAreConcurrent(cards[i - 1], cards[i]);
-        }
+        
         return isARun;
     }
     
@@ -110,7 +111,7 @@ class RunMeld extends AbstractMeld
         else {
             int card1Value  = card1.getRank().getValue();
             int card2Value  = card2.getRank().getValue();
-            concurrentRanks = card1Value - card2Value == 1;
+            concurrentRanks = card2Value - card1Value == 1;
         }
         return concurrentRanks;
     }

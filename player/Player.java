@@ -83,7 +83,7 @@ public class Player
         
         int i = 0;
         while (!isFound && i < nCardBanks) {
-            String testName = cardBanks_.get(i).getName();
+            String testName = cardBanks_.get(i).toString();
             
             if (testName.equals(name))
                 isFound = true;

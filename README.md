@@ -48,6 +48,8 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 - [ ] Overview of access modifier usage.
 - [ ] Change cardgame/player/PlayerIO from an interface into an abstract class.
 - [ ] Review complexity of methods surrounding playing cards.
+- [ ] Review usage of ArrayLists (prompted by http://stackoverflow.com/questions/2279030/type-list-vs-type-arraylist-in-java).
+- [ ] Review the implementation of event management.
 
 ###### Gameplay
 - [ ] Support for multiple players.
@@ -56,5 +58,4 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 - [ ] Implement a turn timer.
 - [ ] Implement Skype support.
 - [ ] Support for playing aces as a high card in runs.
-- [ ] Support for AI players.
-- [ ] Randomise who plays first in the first round.
+- [ ] Support for AI players. (Long term goal)

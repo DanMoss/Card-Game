@@ -36,23 +36,38 @@ class Turn
         {
             return nCardsToPlay_;
         }
+        
+        // Finds the possible actions a player may be able to make on their
+        // turn, keeping in mind that they must be able to discard at the end.
+        public static Action[] findOptions(CardBank hand)
+        {
+            Action[] allActions = values();
+            int      nOptions   = 0;
+            
+            for (Action action : allActions) {
+                boolean canDiscard = action.getNCardsToPlay() < hand.size();
+                if (canDiscard)
+                    nOptions++;
+            }
+            
+            Action[] options = new Action[nOptions];
+            for (int i = 0; i < nOptions; i++)
+                options[i] = allActions[i];
+            
+            return options;
+        }
     }
     
-    private final PlayerIO     playerIO_;
-    private final CardBank     hand_;
-    private final Deck         deck_;
-    private final CardBank     discardPile_;
-    private final MeldsManager meldsManager_;
+    private final PlayerIO playerIO_;
+    private final CardBank hand_;
+    private final Board    board_;
     
     // Constructor
-    public Turn(Player player, Deck deck, CardBank discardPile,
-                MeldsManager meldsManager)
+    public Turn(Player player, Board board)
     {
-        playerIO_     = player.getPlayerIO();
-        hand_         = player.findCardBank(CardBanks.HAND);
-        deck_         = deck;
-        discardPile_  = discardPile;
-        meldsManager_ = meldsManager;
+        playerIO_ = player.getPlayerIO();
+        hand_     = player.findCardBank(CardBanks.HAND);
+        board_    = board;
     }
     
     // Other methods
@@ -70,10 +85,12 @@ class Turn
     // Manages the draw phase of the player's turn
     private void draw()
     {
-        String message = "Would you like to draw from the deck, or take the "
-                       + discardPile_.getCard(0) + " from the discard pile?";
+        CardBank discards = board_.getDiscards();
+        String   message  = "Would you like to take the " + discards.getCard(0)
+                          + " from the discard pile, or draw from the deck?";
         playerIO_.sendMessage(message);
-        CardBank[] options    = {deck_, discardPile_};
+        
+        CardBank[] options    = {discards, board_.getDeck()};
         CardBank   drawSource = Selector.select(playerIO_, options);
         hand_.transferFrom(drawSource, 0, 1);
     }
@@ -83,14 +100,14 @@ class Turn
     {
         Card card = chooseCards(1)[0];
         hand_.discard(card);
-        discardPile_.add(0, card);
+        board_.getDiscards().add(0, card);
     }
     
     // Prompts the player to choose what to do this turn
     private boolean chooseAction()
     {
         playerIO_.sendMessage("What would you like to do?");
-        Action  action = Selector.select(playerIO_, Action.values());
+        Action  action = Selector.select(playerIO_, Action.findOptions(hand_));
         boolean turnOver;
         
         if (action == Action.END_TURN) {
@@ -98,7 +115,7 @@ class Turn
         }
         else {
             Card[] cards = chooseCards(action.getNCardsToPlay());
-            meldsManager_.play(playerIO_, hand_, cards);
+            board_.getMelds().play(playerIO_, hand_, cards);
             turnOver = false;
         }
         
@@ -108,7 +125,7 @@ class Turn
     // Prompts the player to choose {@code nCardsToPlay} from their hand
     private Card[] chooseCards(int nCardsToPlay)
     {
-        CardBank temp  = new CardBank("", nCardsToPlay);
+        CardBank temp  = new CardBank("");
         Card[]   cards = new Card[nCardsToPlay];
         
         for (int i = 0; i < nCardsToPlay; i++) {
