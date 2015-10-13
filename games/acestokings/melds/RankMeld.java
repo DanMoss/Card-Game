@@ -1,5 +1,6 @@
 package cardgame.games.acestokings.melds;
 
+import java.util.List;
 import java.util.ArrayList;
 import cardgame.card.Suit;
 import cardgame.card.Rank;
@@ -10,9 +11,9 @@ class RankMeld extends AbstractMeld
 {
     private final int MELD_CAPACITY = Suit.values().length;
     
-    private final Rank            meldRank_;
-    private final ArrayList<Card> meld_;
-    private       int             nJokers_;
+    private final Rank       meldRank_;
+    private final List<Card> meld_;
+    private       int        nJokers_;
     
     // Constructor
     protected RankMeld(Rank meldRank, Rank jokerRank)
@@ -32,7 +33,7 @@ class RankMeld extends AbstractMeld
     }
     
     // Appends {@code options} with plays that can be made with {@code card}
-    protected void addCardPlays(ArrayList<PlayOption> options, Card card)
+    protected void addCardPlays(List<PlayOption> options, Card card)
     {
         boolean meldExists = meld_.size() >= MeldsManager.MINIMUM_MELD_SIZE;
         boolean canPlay    = meldExists   && allCorrectRank(card);
@@ -42,7 +43,7 @@ class RankMeld extends AbstractMeld
     }
     
     // Appends {@code options} with plays that can be made with {@code cards}
-    protected void addMeldPlays(ArrayList<PlayOption> options, Card... cards)
+    protected void addMeldPlays(List<PlayOption> options, Card... cards)
     {
         boolean canPlay = hasSpace(cards) && allCorrectRank(cards);
         if (canPlay)
@@ -114,7 +115,7 @@ class RankMeld extends AbstractMeld
     }
     
     // Appends {@code options} with a new option
-    private void addOption(ArrayList<PlayOption> options, Card... cards)
+    private void addOption(List<PlayOption> options, Card... cards)
     {
         PlayOption option = new PlayOption(this, cards);
         options.add(option);

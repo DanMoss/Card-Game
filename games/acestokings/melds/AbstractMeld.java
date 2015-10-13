@@ -1,6 +1,6 @@
 package cardgame.games.acestokings.melds;
 
-import java.util.ArrayList;
+import java.util.List;
 import cardgame.card.Rank;
 import cardgame.card.Card;
 import cardgame.card.CardBank;
@@ -20,11 +20,10 @@ abstract class AbstractMeld
     protected abstract void play(CardBank hand, PlayOption option);
     
     // Appends {@code options} with plays that can be made with {@code card}
-    protected abstract void addCardPlays(ArrayList<PlayOption> options,
-                                         Card card);
+    protected abstract void addCardPlays(List<PlayOption> options, Card card);
     
     // Appends {@code options} with plays that can be made with {@code cards}
-    protected abstract void addMeldPlays(ArrayList<PlayOption> options,
+    protected abstract void addMeldPlays(List<PlayOption> options,
                                          Card... cards);
     
     @Override
@@ -32,7 +31,7 @@ abstract class AbstractMeld
     
     // Other methods
     // Appends {@code options} with plays that can be made with {@code cards}
-    void findPlayOptions(ArrayList<PlayOption> options, Card... cards)
+    void findPlayOptions(List<PlayOption> options, Card... cards)
     {
         if (cards.length == 1)
             addCardPlays(options, cards[0]);

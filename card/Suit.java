@@ -17,6 +17,7 @@ public enum Suit
         name_  = name;
     }
     
+    // Accessors
     public int getValue()
     {
         return value_;

@@ -1,5 +1,6 @@
 package cardgame.player;
 
+import java.util.List;
 import java.util.ArrayList;
 import cardgame.card.CardBank;
 
@@ -12,10 +13,10 @@ public class Player
     
     private static int nPlayers_ = 0;
     
-    private String              name_;
-    private ArrayList<CardBank> cardBanks_;
-    private PlayerIO            playerIO_;
-    private Points              points_;
+    private String         name_;
+    private List<CardBank> cardBanks_;
+    private PlayerIO       playerIO_;
+    private Points         points_;
     
     // Constructors
     public Player(Type type)
@@ -43,7 +44,7 @@ public class Player
         return name_;
     }
     
-    public ArrayList<CardBank> getCardBanks()
+    public List<CardBank> getCardBanks()
     {
         return cardBanks_;
     }

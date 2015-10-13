@@ -2,7 +2,7 @@ package cardgame.player;
 
 public class Points
 {
-    private int       amount_;
+    private       int amount_;
     private final int minAmount_;
     
     // Constructors

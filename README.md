@@ -40,15 +40,13 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 ###### Documentation
 - [X] Create a README.md.
 - [ ] Fill out README.md.
-- [ ] Review of directory usage.
+- [ ] Review directory usage.
 - [ ] Look into proper documentation standards.
 - [ ] Apply proper documentation standards.
 
 ###### Code quality
-- [ ] Overview of access modifier usage.
-- [ ] Change cardgame/player/PlayerIO from an interface into an abstract class.
+- [ ] Review access modifier usage.
 - [ ] Review complexity of methods surrounding playing cards.
-- [ ] Review usage of ArrayLists (prompted by http://stackoverflow.com/questions/2279030/type-list-vs-type-arraylist-in-java).
 - [ ] Review the implementation of event management.
 
 ###### Gameplay

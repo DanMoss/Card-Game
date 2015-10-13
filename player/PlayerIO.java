@@ -1,9 +1,9 @@
 package cardgame.player;
 
-public interface PlayerIO
+public abstract class PlayerIO
 {
-    public void sendMessage(String message);
+    public abstract void sendMessage(String message);
     
     // lowerBound inclusive, upperBound exclusive
-    public int chooseInt(int lowerBound, int upperBound);
+    public abstract int chooseInt(int lowerBound, int upperBound);
 }

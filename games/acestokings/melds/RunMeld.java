@@ -1,6 +1,6 @@
 package cardgame.games.acestokings.melds;
 
-import java.util.ArrayList;
+import java.util.List;
 import cardgame.card.Suit;
 import cardgame.card.Rank;
 import cardgame.card.Card;
@@ -30,7 +30,7 @@ class RunMeld extends AbstractMeld
     }
     
     // Appends {@code options} with plays that can be made with {@code card}
-    protected void addCardPlays(ArrayList<PlayOption> options, Card card)
+    protected void addCardPlays(List<PlayOption> options, Card card)
     {
         if (allCorrectSuit(card)) {
             if (isJoker(card)) {
@@ -54,7 +54,7 @@ class RunMeld extends AbstractMeld
     }
     
     // Appends {@code options} with plays that can be made with {@code cards}
-    protected void addMeldPlays(ArrayList<PlayOption> options, Card... cards)
+    protected void addMeldPlays(List<PlayOption> options, Card... cards)
     {
         if (isARun(cards) && allCorrectSuit(cards)) {
             int maxStartingIndex = meld_.length - cards.length;
@@ -161,8 +161,7 @@ class RunMeld extends AbstractMeld
     }
     
     // Appends {@code options} with a new option
-    private void addOption(ArrayList<PlayOption> options,
-                           int index, Card... cards)
+    private void addOption(List<PlayOption> options, int index, Card... cards)
     {
         PlayOption option = new PlayOption(this, cards);
         option.setIndex(index);

@@ -28,6 +28,7 @@ public enum Rank
         plural_ = plural;
     }
     
+    // Accessors
     public int getValue()
     {
         return value_;

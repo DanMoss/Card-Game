@@ -2,8 +2,7 @@ package cardgame.player;
 
 import java.util.Scanner;
 
-class ConsolePlayerIO
-    implements PlayerIO
+class ConsolePlayerIO extends PlayerIO
 {
     public ConsolePlayerIO()
     {

@@ -6,6 +6,7 @@ import cardgame.card.Suit;
 import cardgame.card.CardBank;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
+import java.util.List;
 import java.util.ArrayList;
 
 public class MeldsManager
@@ -40,8 +41,8 @@ public class MeldsManager
     // {@code cards}, or informs them if no plays can be made.
     public void play(PlayerIO playerIO, CardBank hand, Card... cards)
     {
-        ArrayList<PlayOption> optionsList  = findPlayOptions(cards);
-        int                   nOptions     = optionsList.size();
+        List<PlayOption> optionsList = findPlayOptions(cards);
+        int              nOptions    = optionsList.size();
         
         if (nOptions > 0) {
             PlayOption[] options = new PlayOption[nOptions];
@@ -55,9 +56,9 @@ public class MeldsManager
     }
     
     // Creates a list of possible plays using {@code cards}
-    private ArrayList<PlayOption> findPlayOptions(Card... cards)
+    private List<PlayOption> findPlayOptions(Card... cards)
     {
-        ArrayList<PlayOption> options = new ArrayList<PlayOption>();
+        List<PlayOption> options = new ArrayList<PlayOption>();
         
         for (RankMeld rankMeld : rankMelds_)
             rankMeld.findPlayOptions(options, cards);
