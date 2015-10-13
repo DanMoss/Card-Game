@@ -2,13 +2,14 @@ package cardgame.card;
 
 import cardgame.event.EventSource;
 import cardgame.event.EventListener;
+import cardgame.player.Selectable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
 public class CardBank
-    implements EventSource
+    implements Selectable, EventSource
 {
     private final String              name_;
     private final List<Card>          cards_;
@@ -32,6 +33,13 @@ public class CardBank
     public Card getCard(int i)
     {
         return cards_.get(i);
+    }
+    
+    // Implementation of Selectable
+    // Used by Selector to convey the option to the player
+    public String getMessage()
+    {
+        return toString(); // Code duplication here, consider other options
     }
     
     // Implementation of EventSource

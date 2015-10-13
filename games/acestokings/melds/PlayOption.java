@@ -3,8 +3,10 @@ package cardgame.games.acestokings.melds;
 import cardgame.card.Card;
 import cardgame.card.CardBank;
 import cardgame.card.Rank;
+import cardgame.player.Selectable;
 
 class PlayOption
+    implements Selectable
 {
     private final AbstractMeld meld_;
     private final Card[]       cards_;
@@ -37,14 +39,9 @@ class PlayOption
         indexSet_ = true;
     }
     
-    // Other methods
-    protected void play(CardBank hand)
-    {
-        meld_.play(hand, this);
-    }
-    
-    @Override
-    public String toString()
+    // Implementation of Selectable
+    // Used by Selector to convey the option to the player
+    public String getMessage()
     {
         String string = "Play to " + meld_;
         if (indexSet_) {
@@ -54,5 +51,11 @@ class PlayOption
             string += Rank.values()[index_];
         }
         return string;
+    }
+    
+    // Other methods
+    protected void play(CardBank hand)
+    {
+        meld_.play(hand, this);
     }
 }

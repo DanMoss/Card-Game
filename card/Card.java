@@ -1,6 +1,9 @@
 package cardgame.card;
 
+import cardgame.player.Selectable;
+
 public class Card
+    implements Selectable
 {
     private final Rank rank_;
     private final Suit suit_;
@@ -23,6 +26,19 @@ public class Card
         return rank_;
     }
     
+    @Override
+    public String toString()
+    {
+        return rank_ + " of " + suit_;
+    }
+    
+    // Implementation of Selectable
+    // Used by Selector to convey the option to the player
+    public String getMessage()
+    {
+        return toString(); // Code duplication here, consider other options
+    }
+    
     // Other methods
     @Override
     public boolean equals(Object object)
@@ -40,17 +56,10 @@ public class Card
     @Override
     public int hashCode()
     {
-        int prime1 = 23; // Non-zero
-        int prime2 = 31;
-        int result;
-        result = prime2 * prime1 + suit_.hashCode();
-        result = result * prime1 + rank_.hashCode();
-        return result;
-    }
-    
-    @Override
-    public String toString()
-    {
-        return rank_ + " of " + suit_;
+        int suitValue = getSuit().getValue();
+        int rankValue = getRank().getValue();
+        int nRanks    = Rank.values().length;
+        int hash      = rankValue + nRanks * suitValue;
+        return hash;
     }
 }

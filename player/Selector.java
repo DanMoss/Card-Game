@@ -7,16 +7,16 @@ public class Selector
     {
     }
     
-    // Prompts the player to choose one of the {@code options} and returns
-    // the choice
-    public static <Type> Type select(PlayerIO playerIO, Type[] options)
+    // Prompts the player to choose one of the {@code options} and returns the
+    // choice
+    public static <Type extends Selectable> Type
+        select(PlayerIO playerIO, Type[] options)
     {
         String message  = "You have the following options:";
         int    nOptions = options.length;
         
-        for (int i = 0; i < nOptions; i++) {
-            message += "\n  " + i + " :  " + options[i];
-        }
+        for (int i = 0; i < nOptions; i++)
+            message += "\n  " + i + " :  " + options[i].getMessage();
         
         playerIO.sendMessage(message);
         playerIO.sendMessage("Please make your choice:");

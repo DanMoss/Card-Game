@@ -4,6 +4,7 @@ import cardgame.games.acestokings.melds.MeldsManager;
 import cardgame.player.Player;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
+import cardgame.player.Selectable;
 import cardgame.card.Card;
 import cardgame.card.CardBank;
 import cardgame.card.Deck;
@@ -11,6 +12,7 @@ import cardgame.card.Deck;
 class Turn
 {
     private enum Action
+        implements Selectable
     {
         END_TURN ("End your turn and discard.", 0),
         ADD_CARD ("Add a card to a set.", 1),
@@ -26,15 +28,17 @@ class Turn
             nCardsToPlay_ = nCardsToPlay;
         }
         
-        @Override
-        public String toString()
-        {
-            return message_;
-        }
-        
+        // Accessor
         public int getNCardsToPlay()
         {
             return nCardsToPlay_;
+        }
+        
+        // Implementation of Selectable
+        // Used by Selector to convey the option to the player
+        public String getMessage()
+        {
+            return message_;
         }
         
         // Finds the possible actions a player may be able to make on their

@@ -23,7 +23,7 @@ class RankMeld extends AbstractMeld
         nJokers_  = 0;
     }
     
-    // Implementations of abstract methods
+    // Implementations of abstract methods in AbstractMeld
     // Plays some card(s) to the meld
     protected void play(CardBank hand, PlayOption option)
     {

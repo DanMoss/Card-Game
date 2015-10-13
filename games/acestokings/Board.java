@@ -15,8 +15,8 @@ class Board
     implements EventListener
 {
     private static final int    HAND_SIZE = 7;
-    private static final String DECK      = "Deck"
-    private static final String DISCARDS  = "Discard pile"
+    private static final String DECK      = "Deck";
+    private static final String DISCARDS  = "Discard pile";
     
     private CardBank          deck_;
     private CardBank          discards_;
@@ -60,7 +60,7 @@ class Board
     {
         stopListening();
         deck_     = new Deck(DECK);
-        discards_ = new CardBank(DISCARD_PILE);
+        discards_ = new CardBank(DISCARDS);
         deal(players);
         startListening(deck_);
         
