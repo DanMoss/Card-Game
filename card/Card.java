@@ -1,9 +1,10 @@
 package cardgame.card;
 
 import cardgame.player.Selectable;
+import java.lang.Comparable;
 
 public class Card
-    implements Selectable
+    implements Comparable<Card>, Selectable
 {
     private final Rank rank_;
     private final Suit suit_;
@@ -29,7 +30,31 @@ public class Card
     @Override
     public String toString()
     {
-        return rank_ + " of " + suit_;
+        return getRank() + " of " + getSuit();
+    }
+    
+    // Implementation of Comparable
+    // Compares two cards, ordering first by suit and then by rank.
+    public int compareTo(Card card)
+    {
+        int thisSuit = getSuit().getValue();
+        int cardSuit = card.getSuit().getValue();
+        int result;
+        
+        if (thisSuit == cardSuit) {
+            int thisRank = getRank().getValue();
+            int cardRank = card.getRank().getValue();
+            
+            if (thisRank == cardRank)
+                result = 0;
+            else
+                result = thisRank < cardRank ? -1 : 1;
+        }
+        else {
+            result = thisSuit < cardSuit ? -1 : 1;
+        }
+        
+        return result;
     }
     
     // Implementation of Selectable
@@ -48,9 +73,10 @@ public class Card
         if (!(object instanceof Card))
             return false;
         
-        Card card = (Card) object;
-        return ((suit_ == card.suit_) &&
-                (rank_ == card.rank_));
+        Card    card     = (Card) object;
+        boolean sameRank = getRank() == card.getRank();
+        boolean sameSuit = getSuit() == card.getSuit();
+        return sameRank && sameSuit;
     }
     
     @Override

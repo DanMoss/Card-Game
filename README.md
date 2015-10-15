@@ -18,12 +18,12 @@ Ace | 1 point
 Jack | 11 points
 Queen | 12 points
 King | 13 points
-Two through Ten | 2 - 10 points, using the now clear relation between card and points
+Two through Ten | These cards are worth their rank value in points.
 
 ###### Turns
 Each player starts their turn either by taking the face-up card from the top of the discard pile, or by drawing a card from the top of the deck. Afterwards, the player enters the main phase of their turn. If they wish to, they can now play any melds they have in their hand, and/or add cards to an already existing meld on the board. Once they have finished playing cards to the board, they must discard 1 card to the discard pile to end their turn. It is important to note that **a player must discard to end their turn**.
 
-If a player draws the last card of the deck on their turn, then before their turn continues, the discard pile is shuffled and placed as the new deck. The card the player chooses to discard at the end of their turn will act as the start of the new discard pile.
+If a player draws the last card of the deck on their turn, then before their turn continues, the discard pile is shuffled and placed as the new deck. The card the player chooses to discard at the end of their turn will act as the start of the new discard pile. If the player chooses to draw from the discard pile, then they can not discard the card they drew at the end of their turn.
 
 ###### Jokers
 Each round, a specific card rank will serve as a joker, able to mimic properties of other cards in the deck. The specific rank scales through the game with the rounds, starting with aces and ending with kings.
@@ -51,6 +51,7 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 
 ###### Gameplay
 - [ ] Support for multiple players.
+- [ ] Prevention of discarding cards drawn from the discard pile.
 - [ ] Implement a system to display the game state.
 - [ ] Allow for cancelling player choices.
 - [ ] Implement a turn timer.

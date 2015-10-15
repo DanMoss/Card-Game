@@ -81,6 +81,7 @@ class Turn
         draw();
         boolean turnOver;
         do {
+            hand_.sort();
             turnOver = chooseAction();
         } while (!turnOver);
         discard();

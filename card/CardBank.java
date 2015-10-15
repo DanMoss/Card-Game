@@ -3,6 +3,7 @@ package cardgame.card;
 import cardgame.event.EventSource;
 import cardgame.event.EventListener;
 import cardgame.player.Selectable;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,7 +81,7 @@ public class CardBank
         Collections.shuffle(cards_, rng);
     }
     
-    // ArrayList method shortcuts
+    // List method shortcuts
     public void add(Card card)
     {
         cards_.add(card);
@@ -121,5 +122,10 @@ public class CardBank
     {
         Card[] cards = new Card[size()];
         return cards_.toArray(cards);
+    }
+    
+    public void sort()
+    {
+        Collections.sort(cards_);
     }
 }
