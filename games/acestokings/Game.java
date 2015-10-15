@@ -1,12 +1,13 @@
 package cardgame.games.acestokings;
 
-import java.util.List;
-import java.util.ArrayList;
 import cardgame.player.Player;
 import cardgame.player.Points;
 import cardgame.card.CardBank;
 import cardgame.card.Rank;
 import cardgame.card.Card;
+
+import java.util.List;
+import java.util.ArrayList;
 
 class Game
 {

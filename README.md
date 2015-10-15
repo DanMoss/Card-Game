@@ -51,7 +51,6 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 
 ###### Gameplay
 - [ ] Support for multiple players.
-- [ ] Prevention of discarding cards drawn from the discard pile.
 - [ ] Implement a system to display the game state.
 - [ ] Allow for cancelling player choices.
 - [ ] Implement a turn timer.

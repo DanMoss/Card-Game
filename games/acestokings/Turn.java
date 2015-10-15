@@ -65,13 +65,15 @@ class Turn
     private final PlayerIO playerIO_;
     private final CardBank hand_;
     private final Board    board_;
+    private final Card     discardPickUp_;
     
     // Constructor
     public Turn(Player player, Board board)
     {
-        playerIO_ = player.getPlayerIO();
-        hand_     = player.findCardBank(CardBanks.HAND);
-        board_    = board;
+        playerIO_      = player.getPlayerIO();
+        hand_          = player.findCardBank(CardBanks.HAND);
+        board_         = board;
+        discardPickUp_ = board_.getDiscards().getCard(0);
     }
     
     // Other methods
@@ -91,19 +93,30 @@ class Turn
     private void draw()
     {
         CardBank discards = board_.getDiscards();
-        String   message  = "Would you like to take the " + discards.getCard(0)
+        String   message  = "Would you like to take the " + discardPickUp_
                           + " from the discard pile, or draw from the deck?";
         playerIO_.sendMessage(message);
         
         CardBank[] options    = {discards, board_.getDeck()};
         CardBank   drawSource = Selector.select(playerIO_, options);
+        
         hand_.transferFrom(drawSource, 0, 1);
     }
     
     // Manages the discard phase of the player's turn
     private void discard()
     {
-        Card card = chooseCards(1)[0];
+        boolean isDiscardPickUp;
+        Card    card;
+        do {
+            card            = chooseCards(1)[0];
+            isDiscardPickUp = card.equals(discardPickUp_);
+            if (isDiscardPickUp) {
+                String message = "You may not discard a card you drew this "
+                               + "turn from the discard pile.";
+                playerIO_.sendMessage(message);
+            }
+        } while (isDiscardPickUp);
         hand_.discard(card);
         board_.getDiscards().add(0, card);
     }
@@ -120,27 +133,43 @@ class Turn
         }
         else {
             Card[] cards = chooseCards(action.getNCardsToPlay());
-            board_.getMelds().play(playerIO_, hand_, cards);
+            if (canDiscardAfterwards(cards))
+                board_.getMelds().play(playerIO_, hand_, cards);
             turnOver = false;
         }
         
         return turnOver;
     }
     
-    // Prompts the player to choose {@code nCardsToPlay} from their hand
-    private Card[] chooseCards(int nCardsToPlay)
+    // Prompts the player to choose {@code nCards} from their hand
+    private Card[] chooseCards(int nCards)
     {
         CardBank temp  = new CardBank("");
-        Card[]   cards = new Card[nCardsToPlay];
+        Card[]   cards = new Card[nCards];
         
-        for (int i = 0; i < nCardsToPlay; i++) {
+        for (int i = 0; i < nCards; i++) {
             Card card = Selector.select(playerIO_, hand_.toArray());
             temp.add(card);
             hand_.discard(card);
             cards[i] = card;
         }
-        hand_.transferFrom(temp, 0, nCardsToPlay);
+        hand_.transferFrom(temp, 0, nCards);
         
         return cards;
+    }
+    
+    // Checks that the player will still be able to discard if they drew from
+    // the discard pile.
+    private boolean canDiscardAfterwards(Card... cards)
+    {
+        CardBank temp = new CardBank("");
+        for (Card card : cards) {
+            temp.add(card);
+            hand_.discard(card);
+        }
+        boolean canDiscard = hand_.size() > 1
+                          || !(hand_.getCard(0).equals(discardPickUp_));
+        hand_.transferFrom(temp, 0, temp.size());
+        return canDiscard;
     }
 }
