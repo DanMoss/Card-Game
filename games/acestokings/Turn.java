@@ -97,7 +97,7 @@ class Turn
                           + " from the discard pile, or draw from the deck?";
         playerIO_.sendMessage(message);
         
-        CardBank[] options    = {discards, board_.getDeck()};
+        CardBank[] options    = {board_.getDeck(), discards};
         CardBank   drawSource = Selector.select(playerIO_, options);
         
         hand_.transferFrom(drawSource, 0, 1);

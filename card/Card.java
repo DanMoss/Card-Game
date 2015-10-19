@@ -1,7 +1,7 @@
 package cardgame.card;
 
-import cardgame.player.Selectable;
 import java.lang.Comparable;
+import cardgame.player.Selectable;
 
 public class Card
     implements Comparable<Card>, Selectable
