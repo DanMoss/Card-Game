@@ -1,4 +1,4 @@
-package cardgame.event;
+package cardgame.events;
 
 public interface EventListener
 {

@@ -1,15 +1,16 @@
 package cardgame.games.acestokings;
 
-import cardgame.card.Rank;
-import cardgame.card.Deck;
-import cardgame.card.CardBank;
-import cardgame.player.Player;
-import cardgame.games.acestokings.melds.MeldsManager;
-import cardgame.event.EventListener;
-import cardgame.event.EventSource;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
+import cardgame.card.CardBank;
+import cardgame.card.Deck;
+import cardgame.card.Rank;
+import cardgame.events.EventListener;
+import cardgame.events.EventSource;
+import cardgame.games.acestokings.melds.MeldsManager;
+import cardgame.player.Player;
 
 class Board
     implements EventListener
