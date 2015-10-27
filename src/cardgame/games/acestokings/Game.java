@@ -1,13 +1,11 @@
 package cardgame.games.acestokings;
 
-import cardgame.player.Player;
-import cardgame.player.Points;
-import cardgame.card.CardBank;
-import cardgame.card.Rank;
-import cardgame.card.Card;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import cardgame.card.Bank;
+import cardgame.card.Rank;
+import cardgame.player.Player;
 
 class Game
 {
@@ -43,9 +41,9 @@ class Game
     private void resetPlayerHands()
     {
         for (int i = 0; i < nPlayers_; i++) {
-            List<CardBank> list = players_.get(i).getCardBanks();
+            List<Bank> list = players_.get(i).getCardBanks();
             list.clear();
-            list.add(new CardBank(CardBanks.HAND));
+            list.add(new Bank(CardBanks.HAND));
         }
     }
     
@@ -70,7 +68,7 @@ class Game
         for (int i = 0; i < nPlayers_; i++) {
             int      points = 0;
             Player   player = players_.get(i);
-            CardBank hand   = player.findCardBank(CardBanks.HAND);
+            Bank hand   = player.findCardBank(CardBanks.HAND);
             int      nCards = hand.size();
             
             for (int j = 0; j < nCards; j++) {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 import cardgame.card.Deck;
 import cardgame.card.Rank;
 import cardgame.events.EventListener;
@@ -16,11 +16,10 @@ class Board
     implements EventListener
 {
     private static final int    HAND_SIZE = 7;
-    private static final String DECK      = "Deck";
     private static final String DISCARDS  = "Discard pile";
     
-    private CardBank          deck_;
-    private CardBank          discards_;
+    private Bank          deck_;
+    private Bank          discards_;
     private MeldsManager      melds_;
     private List<EventSource> eventSources_;
     private int               roundCount_;
@@ -41,12 +40,12 @@ class Board
         return Rank.values()[roundCount_];
     }
     
-    public CardBank getDeck()
+    public Bank getDeck()
     {
         return deck_;
     }
     
-    public CardBank getDiscards()
+    public Bank getDiscards()
     {
         return discards_;
     }
@@ -60,8 +59,8 @@ class Board
     public int initialiseRound(List<Player> players)
     {
         stopListening();
-        deck_     = new Deck(DECK);
-        discards_ = new CardBank(DISCARDS);
+        deck_     = new Deck();
+        discards_ = new Bank(DISCARDS);
         deal(players);
         startListening(deck_);
         
@@ -79,7 +78,7 @@ class Board
         deck_.shuffle();
         int nPlayers = players.size();
         for (int i = 0; i < nPlayers; i++) {
-            CardBank hand = players.get(i).findCardBank(CardBanks.HAND);
+            Bank hand = players.get(i).findCardBank(CardBanks.HAND);
             hand.transferFrom(deck_, 0, HAND_SIZE);
         }
         discards_.transferFrom(deck_, 0, 1);

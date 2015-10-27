@@ -3,7 +3,7 @@ package cardgame.player;
 import java.lang.Comparable;
 import java.util.List;
 import java.util.ArrayList;
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 
 public class Player
     implements Comparable<Player>
@@ -16,7 +16,7 @@ public class Player
     private static int nPlayers_ = 0;
     
     private String         name_;
-    private List<CardBank> cardBanks_;
+    private List<Bank> cardBanks_;
     private PlayerIO       playerIO_;
     private Points         points_;
     
@@ -34,7 +34,7 @@ public class Player
     public Player(String name, Type type, int nPoints, int minNPoints)
     {
         name_      = name;
-        cardBanks_ = new ArrayList<CardBank>();
+        cardBanks_ = new ArrayList<Bank>();
         points_    = new Points(nPoints, minNPoints);
         setPlayerIO(type);
         nPlayers_++;
@@ -46,7 +46,7 @@ public class Player
         return name_;
     }
     
-    public List<CardBank> getCardBanks()
+    public List<Bank> getCardBanks()
     {
         return cardBanks_;
     }
@@ -94,7 +94,7 @@ public class Player
     }
     
     // Other methods
-    public CardBank findCardBank(String name)
+    public Bank findCardBank(String name)
     {
         int     nCardBanks = cardBanks_.size();
         boolean isFound    = false;

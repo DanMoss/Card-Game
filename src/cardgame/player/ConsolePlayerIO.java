@@ -34,6 +34,8 @@ class ConsolePlayerIO extends PlayerIO
             
         } while (!validInput);
         
+        scanner.close();
+        
         return input;
     }
 }

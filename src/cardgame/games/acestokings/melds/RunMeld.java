@@ -4,7 +4,7 @@ import java.util.List;
 import cardgame.card.Suit;
 import cardgame.card.Rank;
 import cardgame.card.Card;
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 
 class RunMeld extends AbstractMeld
 {
@@ -22,7 +22,7 @@ class RunMeld extends AbstractMeld
     
     // Implementations of abstract methods in AbstractMeld
     // Plays some card(s) to the meld
-    protected void play(CardBank hand, PlayOption option)
+    protected void play(Bank hand, PlayOption option)
     {
         int    index = option.getIndex();
         Card[] cards = option.getCards();
@@ -148,7 +148,7 @@ class RunMeld extends AbstractMeld
     // Other methods
     // Places {@code cards} from {@code hand} as a run, starting at 
     // {@code index}, picking up any jokers as necessary
-    private void place(CardBank hand, int index, Card... cards)
+    private void place(Bank hand, int index, Card... cards)
     {
         for (Card card : cards) {
             if (!isEmpty(index))

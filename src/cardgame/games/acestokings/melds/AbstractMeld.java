@@ -3,7 +3,7 @@ package cardgame.games.acestokings.melds;
 import java.util.List;
 import cardgame.card.Rank;
 import cardgame.card.Card;
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 
 abstract class AbstractMeld
 {
@@ -17,7 +17,7 @@ abstract class AbstractMeld
     
     // Abstract methods
     // Plays some card(s) to the meld
-    protected abstract void play(CardBank hand, PlayOption option);
+    protected abstract void play(Bank hand, PlayOption option);
     
     // Appends {@code options} with plays that can be made with {@code card}
     protected abstract void addCardPlays(List<PlayOption> options, Card card);

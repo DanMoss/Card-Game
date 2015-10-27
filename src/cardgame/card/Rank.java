@@ -1,5 +1,10 @@
 package cardgame.card;
 
+/**
+ * An enum of the thirteen standard playing card ranks, along with a joker rank
+ * for special cases. The ranks follow their natural ordering, with the ace
+ * classed as being low.
+ */
 public enum Rank
 {
     ACE  ( 1, "Ace",   "aces"),
@@ -14,7 +19,8 @@ public enum Rank
     TEN  (10, "Ten",   "tens"),
     JACK (11, "Jack",  "jacks"),
     QUEEN(12, "Queen", "queens"),
-    KING (13, "King",  "kings");
+    KING (13, "King",  "kings"),
+    JOKER(14, "Joker", "jokers");
     
     private final int    value_;
     private final String name_;
@@ -23,23 +29,38 @@ public enum Rank
     // Constructor
     private Rank(int value, String name, String plural)
     {
-        value_  = value;
-        name_   = name;
-        plural_ = plural;
+        this.value_  = value;
+        this.name_   = name;
+        this.plural_ = plural;
     }
     
-    // Accessors
+    /**
+     * Returns the value of this {@code Rank}.
+     * 
+     * @return the value of this {@code Rank}
+     */
     public int getValue()
     {
         return value_;
     }
     
+    /**
+     * Returns the name of this {@code Rank} in mixed case.
+     * 
+     * @return the name of this {@code Rank} in mixed case
+     * @see    java.lang.Enum#toString()
+     */
     @Override
     public String toString()
     {
         return name_;
     }
     
+    /**
+     * Returns the plural of this {@code Rank}'s name in lower case.
+     * 
+     * @return the name of a group of cards with this {@code Rank}
+     */
     public String getPlural()
     {
         return plural_;

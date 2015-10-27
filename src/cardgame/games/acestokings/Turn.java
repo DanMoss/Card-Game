@@ -1,13 +1,12 @@
 package cardgame.games.acestokings;
 
+import cardgame.card.Card;
+import cardgame.card.Bank;
 import cardgame.games.acestokings.melds.MeldsManager;
 import cardgame.player.Player;
 import cardgame.player.PlayerIO;
-import cardgame.player.Selector;
 import cardgame.player.Selectable;
-import cardgame.card.Card;
-import cardgame.card.CardBank;
-import cardgame.card.Deck;
+import cardgame.player.Selector;
 
 class Turn
 {
@@ -43,7 +42,7 @@ class Turn
         
         // Finds the possible actions a player may be able to make on their
         // turn, keeping in mind that they must be able to discard at the end.
-        public static Action[] findOptions(CardBank hand)
+        public static Action[] findOptions(Bank hand)
         {
             Action[] allActions = values();
             int      nOptions   = 0;
@@ -63,7 +62,7 @@ class Turn
     }
     
     private final PlayerIO playerIO_;
-    private final CardBank hand_;
+    private final Bank hand_;
     private final Board    board_;
     private final Card     discardPickUp_;
     
@@ -92,13 +91,13 @@ class Turn
     // Manages the draw phase of the player's turn
     private void draw()
     {
-        CardBank discards = board_.getDiscards();
+        Bank discards = board_.getDiscards();
         String   message  = "Would you like to take the " + discardPickUp_
                           + " from the discard pile, or draw from the deck?";
         playerIO_.sendMessage(message);
         
-        CardBank[] options    = {board_.getDeck(), discards};
-        CardBank   drawSource = Selector.select(playerIO_, options);
+        Bank[] options    = {board_.getDeck(), discards};
+        Bank   drawSource = Selector.select(playerIO_, options);
         
         hand_.transferFrom(drawSource, 0, 1);
     }
@@ -144,7 +143,7 @@ class Turn
     // Prompts the player to choose {@code nCards} from their hand
     private Card[] chooseCards(int nCards)
     {
-        CardBank temp  = new CardBank("");
+        Bank temp  = new Bank("");
         Card[]   cards = new Card[nCards];
         
         for (int i = 0; i < nCards; i++) {
@@ -162,7 +161,7 @@ class Turn
     // the discard pile.
     private boolean canDiscardAfterwards(Card... cards)
     {
-        CardBank temp = new CardBank("");
+        Bank temp = new Bank("");
         for (Card card : cards) {
             temp.add(card);
             hand_.discard(card);

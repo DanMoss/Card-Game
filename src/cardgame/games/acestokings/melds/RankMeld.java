@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import cardgame.card.Suit;
 import cardgame.card.Rank;
 import cardgame.card.Card;
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 
 class RankMeld extends AbstractMeld
 {
@@ -26,7 +26,7 @@ class RankMeld extends AbstractMeld
     
     // Implementations of abstract methods in AbstractMeld
     // Plays some card(s) to the meld
-    protected void play(CardBank hand, PlayOption option)
+    protected void play(Bank hand, PlayOption option)
     {
         Card[] cards = option.getCards();
         place(hand, cards);
@@ -81,7 +81,7 @@ class RankMeld extends AbstractMeld
     // Other methods
     // Places {@code cards}, picking up any jokers as necessary
     // Note that jokers are always played to the start of the meld
-    private void place(CardBank hand, Card... cards)
+    private void place(Bank hand, Card... cards)
     {
         int nJokersToReplace = findNJokersToReplace(cards);
         

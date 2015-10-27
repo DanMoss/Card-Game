@@ -1,7 +1,7 @@
 package cardgame.games.acestokings.melds;
 
 import cardgame.card.Card;
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 import cardgame.card.Rank;
 import cardgame.player.Selectable;
 
@@ -54,7 +54,7 @@ class PlayOption
     }
     
     // Other methods
-    protected void play(CardBank hand)
+    protected void play(Bank hand)
     {
         meld_.play(hand, this);
     }

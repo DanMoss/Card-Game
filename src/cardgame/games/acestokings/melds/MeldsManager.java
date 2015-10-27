@@ -3,7 +3,7 @@ package cardgame.games.acestokings.melds;
 import cardgame.card.Card;
 import cardgame.card.Rank;
 import cardgame.card.Suit;
-import cardgame.card.CardBank;
+import cardgame.card.Bank;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
 import java.util.List;
@@ -39,7 +39,7 @@ public class MeldsManager
     
     // Prompts the player to choose from a list of possible plays using
     // {@code cards}, or informs them if no plays can be made.
-    public void play(PlayerIO playerIO, CardBank hand, Card... cards)
+    public void play(PlayerIO playerIO, Bank hand, Card... cards)
     {
         List<PlayOption> optionsList = findPlayOptions(cards);
         int              nOptions    = optionsList.size();
