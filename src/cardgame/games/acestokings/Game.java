@@ -56,7 +56,7 @@ class Game
             Player player = players_.get(currentPlayer);
             Turn   turn   = new Turn(player, board_);
             turn.play();
-            roundOver     = player.findCardBank(CardBanks.HAND).isEmpty();
+            roundOver     = player.findBank(CardBanks.HAND).isEmpty();
             currentPlayer = (currentPlayer + 1) % nPlayers_;
         } while (!roundOver);
     }
@@ -68,7 +68,7 @@ class Game
         for (int i = 0; i < nPlayers_; i++) {
             int      points = 0;
             Player   player = players_.get(i);
-            Bank hand   = player.findCardBank(CardBanks.HAND);
+            Bank hand   = player.findBank(CardBanks.HAND);
             int      nCards = hand.size();
             
             for (int j = 0; j < nCards; j++) {
@@ -79,7 +79,7 @@ class Game
                     points += rank.getValue();
             }
             
-            player.getPoints().add(points);
+            player.getPoints().modify(points);
         }
     }
     

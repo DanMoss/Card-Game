@@ -70,7 +70,7 @@ class Turn
     public Turn(Player player, Board board)
     {
         playerIO_      = player.getPlayerIO();
-        hand_          = player.findCardBank(CardBanks.HAND);
+        hand_          = player.findBank(CardBanks.HAND);
         board_         = board;
         discardPickUp_ = board_.getDiscards().getCard(0);
     }

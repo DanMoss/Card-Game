@@ -78,7 +78,7 @@ class Board
         deck_.shuffle();
         int nPlayers = players.size();
         for (int i = 0; i < nPlayers; i++) {
-            Bank hand = players.get(i).findCardBank(CardBanks.HAND);
+            Bank hand = players.get(i).findBank(CardBanks.HAND);
             hand.transferFrom(deck_, 0, HAND_SIZE);
         }
         discards_.transferFrom(deck_, 0, 1);
@@ -99,7 +99,7 @@ class Board
     public void startListening(EventSource source)
     {
         source.addListener(this);
-        eventSources_.add(source);
+        eventSources_.modify(source);
     }
     
     // Stops listening to {@code source}

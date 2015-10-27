@@ -1,9 +1,12 @@
 //package cardgame.games.acestokings;
-package cardgame.player;
+package cardgame.games.acestokings;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import cardgame.player.Player;
+import cardgame.player.Player.Type;
 
 class Leaderboard
 {
