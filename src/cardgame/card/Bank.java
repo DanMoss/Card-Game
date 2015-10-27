@@ -3,6 +3,7 @@ package cardgame.card;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import cardgame.player.Selectable;
@@ -85,8 +86,17 @@ public class Bank
      */
     @Override
     public Card draw()
+        throws NoSuchElementException
     {
-        return this.cards_.get(0);
+        Card aCard;
+        try {
+            aCard = this.cards_.get(0);
+            this.cards_.remove(aCard);
+        }
+        catch (Exception exception) {
+            throw new NoSuchElementException("No cards left in the deck.");
+        }
+        return aCard;
     }
     
     /* (non-Javadoc)
