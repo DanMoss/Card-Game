@@ -1,69 +1,139 @@
 package cardgame.games.acestokings.melds;
 
-import java.util.List;
 import java.util.ArrayList;
-import cardgame.card.Suit;
-import cardgame.card.Rank;
-import cardgame.card.Card;
-import cardgame.card.Bank;
+import java.util.List;
 
+import cardgame.card.Card;
+import cardgame.card.CardCollection;
+import cardgame.card.Rank;
+
+/**
+ * A meld of cards that have the same rank. May contain jokers mimicking other
+ * cards.
+ * 
+ * @see AbstractMeld
+ * @see Card
+ * @see Rank
+ */
 class RankMeld extends AbstractMeld
 {
-    private final int MELD_CAPACITY = Suit.values().length;
+    private static final int MELD_CAPACITY = 4;
     
     private final Rank       meldRank_;
     private final List<Card> meld_;
-    private       int        nJokers_;
+    private final List<Card> jokers_;
     
-    // Constructor
-    protected RankMeld(Rank meldRank, Rank jokerRank)
+    /**
+     * Sole constructor.
+     * 
+     * @param meldRank the {@code Rank} of {@code Card}s that the
+     *                 {@code RankMeld} can accept
+     */
+    protected RankMeld(Rank meldRank)
     {
-        super(jokerRank);
-        meldRank_ = meldRank;
-        meld_     = new ArrayList<Card>(MELD_CAPACITY);
-        nJokers_  = 0;
+        this.meldRank_ = meldRank;
+        this.meld_     = new ArrayList<Card>(RankMeld.MELD_CAPACITY);
+        this.jokers_   = new ArrayList<Card>(RankMeld.MELD_CAPACITY);
     }
     
-    // Implementations of abstract methods in AbstractMeld
-    // Plays some card(s) to the meld
-    protected void play(Bank hand, PlayOption option)
+    /* (non-Javadoc)
+     * @see AbstractMeld#play(cardgame.card.CardCollection, PlayOption)
+     */
+    protected void play(CardCollection collection, PlayOption option)
     {
-        Card[] cards = option.getCards();
-        place(hand, cards);
+        // Building the collection of jokers to pick up
+        Card[] cards            = option.getCards();
+        int    nJokersToReplace = countJokersToPickUp(cards);
+        Card[] jokers           = new Card[nJokersToReplace];
+        for (int i = 0; i < nJokersToReplace; i++)
+            jokers[i] = this.jokers_.get(i);
+        
+        // Transferring the cards
+        this.transferTo(collection, jokers);
+        collection.transferTo(this, cards);
     }
     
-    // Appends {@code options} with plays that can be made with {@code card}
-    protected void addCardPlays(List<PlayOption> options, Card card)
+    /* (non-Javadoc)
+     * @see AbstractMeld#addCardPlays(java.util.List, cardgame.card.Card)
+     */
+    protected void addCardPlays(List<PlayOption> options, Card aCard)
     {
-        boolean meldExists = meld_.size() >= MeldsManager.MINIMUM_MELD_SIZE;
-        boolean canPlay    = meldExists   && allCorrectRank(card);
-        canPlay            = canPlay      && hasSpace(card);
+        boolean meldExists = this.size() >= MeldsManager.MINIMUM_MELD_SIZE;
+        boolean canPlay    = meldExists  && checkRanks(aCard);
+        canPlay            = canPlay     && hasSpace(aCard);
         if (canPlay)
-            addOption(options, card);
+            addOption(options, aCard);
     }
     
-    // Appends {@code options} with plays that can be made with {@code cards}
+    /* (non-Javadoc)
+     * @see AbstractMeld#addMeldPlays(java.util.List, cardgame.card.Card[])
+     */
     protected void addMeldPlays(List<PlayOption> options, Card... cards)
     {
-        boolean canPlay = hasSpace(cards) && allCorrectRank(cards);
+        boolean canPlay = hasSpace(cards) && checkRanks(cards);
         if (canPlay)
             addOption(options, cards);
     }
     
+    /* (non-Javadoc)
+     * @see AbstractMeld#toString()
+     */
     public String toString()
     {
-        return "a set of " + meldRank_.getPlural();
+        return "a set of " + this.meldRank_.getPlural();
     }
     
-    // Methods for checking meld conditions
-    // Checks that {@code cards} are all of the correct rank for the meld
-    private boolean allCorrectRank(Card... cards)
+    
+    /* (non-Javadoc)
+     * @see cardgame.card.CardCollection#size()
+     */
+    public int size()
+    {
+        return this.meld_.size();
+    }
+    
+    /**
+     * Adds a {@code Card} to this {@code RankMeld}. Jokers are also added to
+     * their own list.
+     * 
+     * @see cardgame.card.CardCollection#add(cardgame.card.Card)
+     */
+    public void add(Card aCard)
+    {
+        this.meld_.add(aCard);
+        if (isJoker(aCard))
+            this.jokers_.add(aCard);
+    }
+    
+    /**
+     * Removes a {@code Card} from this {@code RankMeld}. Jokers are further
+     * removed from their own list.
+     * 
+     * @see cardgame.card.CardCollection#remove(cardgame.card.Card)
+     */
+    public boolean remove(Card aCard)
+    {
+        if (isJoker(aCard))
+            this.jokers_.remove(aCard);
+        return this.meld_.remove(aCard);
+    }
+    
+    /* (non-Javadoc)
+     * @see cardgame.card.CardCollection#reset()
+     */
+    public void reset()
+    {
+        this.meld_.clear();
+    }
+    
+    // Checks that {@code cards} are all of the correct {@code Rank}
+    private boolean checkRanks(Card... cards)
     {
         boolean allCorrect = true;
-        for (Card card : cards) {
-            boolean singleCorrect = card.getRank() == meldRank_;
-            singleCorrect         = singleCorrect  || isJoker(card);
-            allCorrect            = allCorrect     && singleCorrect;
+        for (Card aCard : cards) {
+            boolean singleCorrect = aCard.getRank() == this.meldRank_;
+            singleCorrect         = singleCorrect   || isJoker(aCard);
+            allCorrect            = allCorrect      && singleCorrect;
         }
         return allCorrect;
     }
@@ -71,53 +141,31 @@ class RankMeld extends AbstractMeld
     // Checks that there is space to play {@code cards}
     private boolean hasSpace(Card... cards)
     {
-        int     nJokersToReplace = findNJokersToReplace(cards);
-        int     endMeldSize      = meld_.size() + cards.length;
-        endMeldSize              = endMeldSize - nJokersToReplace;
-        boolean withinCapacity   = endMeldSize <= MELD_CAPACITY;
-        return withinCapacity;
-    }
-    
-    // Other methods
-    // Places {@code cards}, picking up any jokers as necessary
-    // Note that jokers are always played to the start of the meld
-    private void place(Bank hand, Card... cards)
-    {
-        int nJokersToReplace = findNJokersToReplace(cards);
-        
-        for (int i = 0; i < nJokersToReplace; i++) {
-            hand.add(meld_.remove(0));
-            nJokers_--;
-        }
-        
-        for (Card card : cards) {
-            if (isJoker(card)) {
-                meld_.add(0, card);
-                nJokers_++;
-            }
-            else {
-                meld_.add(card);
-            }
-            hand.discard(card);
-        }
+        int     nJokersToPickUp = countJokersToPickUp(cards);
+        int     endMeldSize     = this.size() + cards.length - nJokersToPickUp;
+        boolean withinCapacity  = endMeldSize <= RankMeld.MELD_CAPACITY;
+        return  withinCapacity;
     }
     
     // Finds out how many jokers to pick up when playing {@code cards}
-    private int findNJokersToReplace(Card... cards)
+    private int countJokersToPickUp(Card... cards)
     {
         int nNonJokers = 0;
         for (Card card : cards) {
             if (!isJoker(card))
                 nNonJokers++;
         }
-        int nJokersToReplace = nNonJokers < nJokers_ ? nNonJokers : nJokers_;
-        return nJokersToReplace;
+        // Minimum of the number of non-jokers being played and the number of
+        // jokers in the meld.
+        int nJokers         = this.jokers_.size();
+        int nJokersToPickUp = nNonJokers < nJokers ? nNonJokers : nJokers;
+        return nJokersToPickUp;
     }
     
     // Appends {@code options} with a new option
     private void addOption(List<PlayOption> options, Card... cards)
     {
-        PlayOption option = new PlayOption(this, cards);
-        options.add(option);
+        PlayOption anOption = new PlayOption(this, cards);
+        options.add(anOption);
     }
 }

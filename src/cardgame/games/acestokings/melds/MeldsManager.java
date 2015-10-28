@@ -1,45 +1,66 @@
 package cardgame.games.acestokings.melds;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
 import cardgame.card.Card;
+import cardgame.card.CardCollection;
 import cardgame.card.Rank;
 import cardgame.card.Suit;
-import cardgame.card.Bank;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
-import java.util.List;
-import java.util.ArrayList;
 
+/**
+ * A manager for the various kinds of melds. Handles find plays for selections
+ * of cards and selecting a play for them.
+ * 
+ * @see AbstractMeld
+ * @see PlayOption
+ * @see cardgame.player.PlayerIO
+ * @see cardgame.player.Selector
+ */
 public class MeldsManager
 {
     public static final int MINIMUM_MELD_SIZE = 3;
     
-    private final RankMeld[] rankMelds_;
-    private final RunMeld[]  runMelds_;
+    private final AbstractMeld[] rankMelds_;
+    private final AbstractMeld[] runMelds_;
     
-    // Constructor
-    public MeldsManager(Rank jokerRank)
+    /**
+     * Sole constructor. Creates all necessary {@code AbstractMeld}s for a
+     * game.
+     */
+    public MeldsManager()
     {
-        Rank[] ranks = Rank.values();
-        Suit[] suits = Suit.values();
-        rankMelds_   = new RankMeld[ranks.length];
-        runMelds_    = new RunMeld [suits.length];
+        Set<Rank> ranks = EnumSet.range(Rank.ACE, Rank.KING);
+        Set<Suit> suits = EnumSet.range(Suit.CLUBS, Suit.SPADES);
+        this.rankMelds_ = new AbstractMeld[ranks.size()];
+        this.runMelds_  = new AbstractMeld[suits.size()];
         
         int i = 0;
-        for (Rank rank : ranks) {
-            rankMelds_[i] = new RankMeld(rank, jokerRank);
+        for (Rank aRank : ranks) {
+            this.rankMelds_[i] = new RankMeld(aRank);
             i++;
         }
         
         int j = 0;
-        for (Suit suit : suits) {
-            runMelds_[j] = new RunMeld(suit, jokerRank);
+        for (Suit aSuit : suits) {
+            this.runMelds_[j] = new RunMeld(aSuit);
             j++;
         }
     }
     
-    // Prompts the player to choose from a list of possible plays using
-    // {@code cards}, or informs them if no plays can be made.
-    public void play(PlayerIO playerIO, Bank hand, Card... cards)
+    /**
+     * Finds possible plays that can be made with some {@code Card}s, and then
+     * prompts the {@code PlayerIO} to pick one.
+     * 
+     * @param playerIO the {@code PlayerIO} to interact with
+     * @param hand     the source of the {@code Card}s
+     * @param cards    the {@code Card}s to play
+     */
+    public void play(PlayerIO playerIO, CardCollection hand, Card... cards)
     {
         List<PlayOption> optionsList = findPlayOptions(cards);
         int              nOptions    = optionsList.size();
@@ -55,17 +76,28 @@ public class MeldsManager
         }
     }
     
-    // Creates a list of possible plays using {@code cards}
+    // Creates a list of possible plays for some {@code Card}s
     private List<PlayOption> findPlayOptions(Card... cards)
     {
         List<PlayOption> options = new ArrayList<PlayOption>();
         
-        for (RankMeld rankMeld : rankMelds_)
-            rankMeld.findPlayOptions(options, cards);
+        for (AbstractMeld aRankMeld : this.rankMelds_)
+            aRankMeld.findPlayOptions(options, cards);
             
-        for (RunMeld runMeld : runMelds_)
-            runMeld.findPlayOptions(options, cards);
+        for (AbstractMeld aRunMeld : this.runMelds_)
+            aRunMeld.findPlayOptions(options, cards);
         
         return options;
+    }
+    
+    /**
+     * Resets all of the {@code AbstractMeld}s to their initial state (empty).
+     */
+    public void reset()
+    {
+        for (AbstractMeld aRankMeld : this.rankMelds_)
+            aRankMeld.reset();
+        for (AbstractMeld aRunMeld : this.runMelds_)
+            aRunMeld.reset();
     }
 }

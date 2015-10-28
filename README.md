@@ -1,5 +1,6 @@
-# cardgame
+# Card-Game
 ## Welcome
+This project aims to recreate multiple card games that should be playable over Skype. A great deal of effort will be made to follow proper object-oriented design principles. Games will be completed one by one, and until completion most parts of the project will be subject to a great deal of change. Feedback is always appreciated!
 
 ## Aces to Kings
 ### How to Play
@@ -41,11 +42,12 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 - [X] Create a README.md.
 - [ ] Fill out README.md.
 - [ ] Review directory usage.
-- [ ] Look into proper documentation standards.
-- [ ] Apply proper documentation standards.
+- [ ] Complete documentation.
 
 ###### Code quality
 - [ ] Review access modifier usage.
+- [ ] Review the use of getters/setters.
+- [ ] Review the RunMeld class and consider creating a Run class to lighten it.
 - [ ] Review complexity of methods surrounding playing cards.
 - [ ] Review the implementation of event management.
 
@@ -55,5 +57,4 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 - [ ] Allow for cancelling player choices.
 - [ ] Implement a turn timer.
 - [ ] Implement Skype support.
-- [ ] Support for playing aces as a high card in runs.
 - [ ] Support for AI players. (Long term goal)

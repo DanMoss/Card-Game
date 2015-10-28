@@ -65,4 +65,25 @@ public enum Rank
     {
         return plural_;
     }
+    
+    /**
+     * Returns the neighbouring {@code Rank} of this {@code Rank}.
+     * <p>
+     * The neighbour returned is specified by the {@code boolean} 
+     * {@code after}, which if true specifies the neighbour is after this
+     * {@code Rank} and not before it. The neighbours are considered to wrap
+     * around so that the first element of the {@code Rank} {@code Enum} is a
+     * neighbour with the last element.
+     * 
+     * @param  after whether the neighbour is before or after this
+     *               {@code Rank}
+     * @return the specified neighbouring {@code Rank}
+     */
+    public Rank getNeighbour(boolean after)
+    {
+        Rank[] ranks          = Rank.values();
+        int    direction      = after ? 1 : -1;
+        int    neighbourIndex = (this.ordinal() + direction) % ranks.length;
+        return ranks[neighbourIndex];
+    }
 }

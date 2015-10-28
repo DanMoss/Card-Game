@@ -70,6 +70,12 @@ public class Bank
         this.cards_.add(aCard);
     }
     
+    @Override
+    public boolean remove(Card aCard)
+    {
+        return this.cards_.remove(aCard);
+    }
+    
     /* (non-Javadoc)
      * @see CardCollection#reset()
      */
@@ -91,10 +97,10 @@ public class Bank
         Card aCard;
         try {
             aCard = this.cards_.get(0);
-            this.cards_.remove(aCard);
+            this.remove(aCard);
         }
         catch (Exception exception) {
-            throw new NoSuchElementException("No cards left in the deck.");
+            throw new NoSuchElementException("No cards left in the deck!");
         }
         return aCard;
     }
@@ -106,20 +112,6 @@ public class Bank
     public String getMessage()
     {
         return toString();
-    }
-    
-    /**
-     * Transfers {@code Card}s from this {@code Bank} to a
-     * {@code CardCollection}.
-     * 
-     * @param destination the {@code CardCollection} to send the {@code Card}s
-     *                    to
-     * @param cards       the {@code Cards} to send
-     */
-    public void transferTo(CardCollection destination, Card... cards)
-    {
-        for (Card aCard : this.cards_)
-            destination.add(aCard);
     }
     
     /**
@@ -137,18 +129,6 @@ public class Bank
     {
         Random rng = new Random();
         Collections.shuffle(this.cards_, rng);
-    }
-    
-    /**
-     * Discards a specified {@code Card} if it is contained in this
-     * {@code Bank}.
-     * 
-     * @param  aCard the {@code Card} to attempt to discard
-     * @return       {@code true} if the {@code Bank} contained {@code aCard}.
-     */
-    public boolean discard(Card aCard)
-    {
-        return this.cards_.remove(aCard);
     }
     
     /**

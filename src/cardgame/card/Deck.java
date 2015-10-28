@@ -79,6 +79,16 @@ public class Deck
         this.cards_.add(aCard);
     }
     
+    
+    /* (non-Javadoc)
+     * @see CardCollection#remove(Card)
+     */
+    @Override
+    public boolean remove(Card aCard)
+    {
+        return this.cards_.remove(aCard);
+    }
+    
     /**
      * Resets this {@code Deck} to its original state.
      * <p>

@@ -1,61 +1,140 @@
 package cardgame.games.acestokings.melds;
 
+import java.util.List;
+
 import cardgame.card.Card;
-import cardgame.card.Bank;
+import cardgame.card.CardCollection;
 import cardgame.card.Rank;
 import cardgame.player.Selectable;
 
+/**
+ * A possible play that can be made with some cards to a meld.
+ * 
+ * @see AbstractMeld
+ * @see Card
+ * @see Selectable
+ */
 class PlayOption
     implements Selectable
 {
     private final AbstractMeld meld_;
     private final Card[]       cards_;
-    private       int          index_;
-    private       boolean      indexSet_;
+    private       List<Rank>   jokers_;
+    private       int          aceValue_;
+    private       Rank         startingRank_;
+    private       boolean      runMeldVariablesSet_;
     
-    // Constructor
-    public PlayOption(AbstractMeld meld, Card... cards)
+    /**
+     * Sole constructor.
+     * 
+     * @param meld  the destination {@AbstractMeld} for the {@code Card}s in
+     *              the {@code PlayOption}
+     * @param cards the {@code Card}s to play if the {@code PlayOption} is
+     *              selected
+     */
+    public PlayOption(AbstractMeld aMeld, Card... cards)
     {
-        meld_     = meld;
-        cards_    = cards;
-        indexSet_ = false;
+        this.meld_                = aMeld;
+        this.cards_               = cards;
+        this.runMeldVariablesSet_ = false;
     }
     
-    // Accessors
+    /**
+     * Returns the {@code Card}s that make up this {@code PlayOption}.
+     * 
+     * @return the {@code Card}s
+     */
     protected Card[] getCards()
     {
-        return cards_;
+        return this.cards_;
     }
     
-    protected int getIndex()
+    /**
+     * Returns an ordered list of {@code Rank}s that the jokers played from
+     * this {@code PlayOption} will mimic. For use by the {@code RunMeld}.
+     * 
+     * @return jokerRanks the ordered list of {@code Rank}s
+     * @see    RunMeld
+     */
+    protected List<Rank> getJokers()
     {
-        return index_;
+        return this.jokers_;
     }
     
-    // Mutator
-    protected void setIndex(int index)
+    /**
+     * Returns the value of aces in this {@code PlayOption. For use by the
+     * {@code RunMeld}.
+     * 
+     * @return the value of aces
+     * @see    RunMeld
+     */
+    protected int getAceValue()
     {
-        index_    = index;
-        indexSet_ = true;
+        return this.aceValue_;
     }
     
-    // Implementation of Selectable
-    // Used by Selector to convey the option to the player
+    /**
+     * Sets an ordered list of {@code Rank}s that the jokers played from this
+     * {@code PlayOption} will mimic. For use by a {@code RunMeld}.
+     * 
+     * @param jokerRanks the ordered list of {@code Rank}s
+     * @see   RunMeld
+     */
+    protected void setJokers(List<Rank> jokerRanks)
+    {
+        this.jokers_              = jokerRanks;
+        this.runMeldVariablesSet_ = true;
+    }
+    
+    /**
+     * Sets the value of aces in this {@code PlayOption}. For use by a
+     * {@code RunMeld}.
+     * 
+     * @param aceValue the value of aces
+     * @see   RunMeld
+     */
+    protected void setAceValue(int aceValue)
+    {
+        this.aceValue_            = aceValue;
+        this.runMeldVariablesSet_ = true;
+    }
+    
+    /**
+     * Sets the first {@code Rank} of the run of {@code Card}s. For use in
+     * {@link #getMessage()}.
+     * 
+     * @param startingRank the first {@code Rank} of the run
+     * @see   RunMeld
+     */
+    protected void setFirstRank(Rank startingRank)
+    {
+        this.startingRank_        = startingRank;
+        this.runMeldVariablesSet_ = true;
+    }
+    
+    /* (non-Javadoc)
+     * @see cardgame.player.Selectable#getMessage()
+     */
     public String getMessage()
     {
-        String string = "Play to " + meld_;
-        if (indexSet_) {
+        String string = "Play to " + this.meld_;
+        if (this.runMeldVariablesSet_) {
             String multipleCards = " starting with a ";
             String singleCard    = " as the ";
-            string += cards_.length > 1 ? multipleCards : singleCard;
-            string += Rank.values()[index_];
+            string += this.cards_.length > 1 ? multipleCards : singleCard;
+            string += this.startingRank_;
         }
         return string;
     }
     
-    // Other methods
-    protected void play(Bank hand)
+    /**
+     * Plays the {@code Card}s in this {@code PlayOption} to the
+     * {@code AbstractMeld}.
+     * 
+     * @param collection the source of the {@code Card}s
+     */
+    protected void play(CardCollection collection)
     {
-        meld_.play(hand, this);
+        this.meld_.play(collection, this);
     }
 }
