@@ -1,174 +1,156 @@
 package cardgame.games.acestokings;
 
-import cardgame.card.Card;
 import cardgame.card.Bank;
-import cardgame.games.acestokings.melds.MeldsManager;
-import cardgame.player.Player;
+import cardgame.card.Card;
+import cardgame.card.CardCollection;
 import cardgame.player.PlayerIO;
-import cardgame.player.Selectable;
 import cardgame.player.Selector;
 
+/**
+ * A turn in the game Aces to Kings.
+ */
 class Turn
 {
-    private enum Action
-        implements Selectable
-    {
-        END_TURN ("End your turn and discard.", 0),
-        ADD_CARD ("Add a card to a set.", 1),
-        PLAY_MELD("Play a set of cards.", MeldsManager.MINIMUM_MELD_SIZE);
-        
-        private final String message_;
-        private final int    nCardsToPlay_;
-        
-        // Constructor
-        private Action(String message, int nCardsToPlay)
-        {
-            message_      = message;
-            nCardsToPlay_ = nCardsToPlay;
-        }
-        
-        // Accessor
-        public int getNCardsToPlay()
-        {
-            return nCardsToPlay_;
-        }
-        
-        // Implementation of Selectable
-        // Used by Selector to convey the option to the player
-        public String getMessage()
-        {
-            return message_;
-        }
-        
-        // Finds the possible actions a player may be able to make on their
-        // turn, keeping in mind that they must be able to discard at the end.
-        public static Action[] findOptions(Bank hand)
-        {
-            Action[] allActions = values();
-            int      nOptions   = 0;
-            
-            for (Action action : allActions) {
-                boolean canDiscard = action.getNCardsToPlay() < hand.size();
-                if (canDiscard)
-                    nOptions++;
-            }
-            
-            Action[] options = new Action[nOptions];
-            for (int i = 0; i < nOptions; i++)
-                options[i] = allActions[i];
-            
-            return options;
-        }
-    }
-    
     private final PlayerIO playerIO_;
-    private final Bank hand_;
+    private final Bank     hand_;
     private final Board    board_;
-    private final Card     discardPickUp_;
+    private       Card     drawnCard_;
     
     // Constructor
-    public Turn(Player player, Board board)
+    public Turn(PlayerIO aPlayerIO, Bank hand, Board aBoard)
     {
-        playerIO_      = player.getPlayerIO();
-        hand_          = player.findBank(CardBanks.HAND);
-        board_         = board;
-        discardPickUp_ = board_.getDiscards().getCard(0);
+        this.playerIO_ = aPlayerIO;
+        this.hand_     = hand;
+        this.board_    = aBoard;
     }
     
-    // Other methods
-    // Manages the player's turn
-    public void play()
+    // Plays the turn out. Returns true if the hand has no cards left.
+    boolean play()
     {
-        draw();
+        this.drawnCard_ = this.board_.draw(this.playerIO_);
+        this.hand_.add(this.drawnCard_);
+        this.playerIO_.sendMessage("You drew the " + this.drawnCard_);
         boolean turnOver;
+        
         do {
-            hand_.sort();
-            turnOver = chooseAction();
+            this.hand_.sort();
+            turnOver = processAction(chooseAction());
         } while (!turnOver);
         discard();
+        
+        return this.hand_.size() == 0;
     }
     
-    // Manages the draw phase of the player's turn
-    private void draw()
-    {
-        Bank discards = board_.getDiscards();
-        String   message  = "Would you like to take the " + discardPickUp_
-                          + " from the discard pile, or draw from the deck?";
-        playerIO_.sendMessage(message);
-        
-        Bank[] options    = {board_.getDeck(), discards};
-        Bank   drawSource = Selector.select(playerIO_, options);
-        
-        hand_.transferFrom(drawSource, 0, 1);
-    }
-    
-    // Manages the discard phase of the player's turn
+    // Discards a {@code Card} from the player's hand. Note that if the
+    // {@code Card} was drawn from the discard pile this turn, then it can not
+    // be discarded this turn.
     private void discard()
     {
-        boolean isDiscardPickUp;
-        Card    card;
+        boolean cannotDiscard;
+        Card    aCard;
+        boolean drewFromDiscards = this.board_.checkIfLastDrewFromDiscards();
+
         do {
-            card            = chooseCards(1)[0];
-            isDiscardPickUp = card.equals(discardPickUp_);
-            if (isDiscardPickUp) {
+            aCard         = chooseCards(1)[0];
+            cannotDiscard = drewFromDiscards && aCard.equals(this.drawnCard_);
+            if (cannotDiscard) {
                 String message = "You may not discard a card you drew this "
                                + "turn from the discard pile.";
-                playerIO_.sendMessage(message);
+                this.playerIO_.sendMessage(message);
             }
-        } while (isDiscardPickUp);
-        hand_.discard(card);
-        board_.getDiscards().add(0, card);
+        } while (cannotDiscard);
+        
+        this.hand_.remove(aCard);
+        this.board_.addToDiscards(aCard);
     }
     
-    // Prompts the player to choose what to do this turn
-    private boolean chooseAction()
+    // Prompts the {@code PlayerIO} to decide what to do
+    private TurnAction chooseAction()
     {
-        playerIO_.sendMessage("What would you like to do?");
-        Action  action = Selector.select(playerIO_, Action.findOptions(hand_));
-        boolean turnOver;
-        
-        if (action == Action.END_TURN) {
-            turnOver = true;
-        }
-        else {
-            Card[] cards = chooseCards(action.getNCardsToPlay());
-            if (canDiscardAfterwards(cards))
-                board_.getMelds().play(playerIO_, hand_, cards);
-            turnOver = false;
-        }
-        
-        return turnOver;
+        int          handSize  = this.hand_.size();
+        TurnAction[] options   = TurnAction.findPossibleActions(handSize);
+        this.playerIO_.sendMessage("What would you like to do?");
+        TurnAction   selection = Selector.select(this.playerIO_, options);
+        return selection;
     }
     
-    // Prompts the player to choose {@code nCards} from their hand
+    // Prompts the {@code PlayerIO} to choose {@code nCards} from their hand.
+    //
+    // A temporary array is created to hold chosen {@code Card}s, which are
+    // removed temporarily to prevent duplicate selections.
     private Card[] chooseCards(int nCards)
     {
-        Bank temp  = new Bank("");
-        Card[]   cards = new Card[nCards];
+        CardCollection temp  = new Bank("");
+        Card[]         cards = new Card[nCards];
         
         for (int i = 0; i < nCards; i++) {
-            Card card = Selector.select(playerIO_, hand_.toArray());
-            temp.add(card);
-            hand_.discard(card);
-            cards[i] = card;
+            Card aCard = Selector.select(this.playerIO_, this.hand_.toArray());
+            cards[i]   = aCard;
+            this.hand_.transferTo(temp, aCard);
         }
-        hand_.transferFrom(temp, 0, nCards);
+        temp.transferTo(this.hand_, cards);
         
         return cards;
     }
     
-    // Checks that the player will still be able to discard if they drew from
-    // the discard pile.
-    private boolean canDiscardAfterwards(Card... cards)
+    // Prompts the {@code PlayerIO} to choose the size of the meld.
+    private int chooseMeldSize()
     {
-        Bank temp = new Bank("");
-        for (Card card : cards) {
-            temp.add(card);
-            hand_.discard(card);
+        int        maxSize = this.hand_.size();
+        MeldSize[] options = new MeldSize[maxSize];
+        for (int i = 0; i < maxSize; i++)
+            options[i] = new MeldSize(i);
+        this.playerIO_.sendMessage("How many cards would you like to use?");
+        MeldSize selection = Selector.select(this.playerIO_, options);
+        return selection.getSize();
+    }
+    
+    // Checks that the player will still be able to discard after playing the
+    // specified {@code Card}s.
+    //
+    // Essentially this is enforcing that a player can not discard a card they
+    // drew from the discard pile on the turn that they drew it.
+    private boolean verifyCanDiscardAfter(Card... cards)
+    {
+        boolean drewFromDiscards = this.board_.checkIfLastDrewFromDiscards();
+        boolean canDiscardAfter  = true;
+        
+        if (drewFromDiscards) {
+            CardCollection temp = new Bank("");
+            this.hand_.transferTo(temp, cards);
+            // Only card left in hand is the drawn card
+            if (this.hand_.remove(this.drawnCard_) && this.hand_.size() == 0) {
+                canDiscardAfter = false;
+                this.hand_.add(this.drawnCard_);
+            }
+            
+            temp.transferTo(this.hand_, cards);
         }
-        boolean canDiscard = hand_.size() > 1
-                          || !(hand_.getCard(0).equals(discardPickUp_));
-        hand_.transferFrom(temp, 0, temp.size());
-        return canDiscard;
+        
+        return canDiscardAfter;
+    }
+    
+    // Processes the {@code TurnAction} chosen.
+    private boolean processAction(TurnAction anAction) {
+        boolean turnOver;
+        
+        if (anAction == TurnAction.END_TURN) {
+            turnOver = true;
+        }
+        else {
+            turnOver = false;
+            int nCardsToPlay;
+            
+            if (anAction == TurnAction.ADD_CARD)
+                nCardsToPlay = 1;
+            else
+                nCardsToPlay = chooseMeldSize();
+            
+            Card[] cards = chooseCards(nCardsToPlay);
+            if (verifyCanDiscardAfter(cards))
+                this.board_.playToMeld(this.playerIO_, this.hand_, cards);
+        }
+        
+        return turnOver;
     }
 }

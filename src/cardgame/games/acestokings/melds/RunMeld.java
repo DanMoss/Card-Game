@@ -71,7 +71,7 @@ class RunMeld extends AbstractMeld
             boolean canPickUpJoker = this.remove(aCard);
             if (canPickUpJoker)
                 collection.add(this.lastRemovedCard_);
-            this.add(aCard);
+            collection.transferTo(this, aCard);
         }
     }
     
@@ -420,6 +420,11 @@ class RunMeld extends AbstractMeld
             if (isJoker(aCard)) {
                 this.playOptionJokers_.add(aRank);
                 canPlace = canPlace && !this.ranks_.contains(aRank);
+                // Jokers skip the setting of the ace value elsewhere
+                if (aRank == Rank.ACE && meldStart != Rank.ACE)
+                    this.aceValue_ = RunMeld.HIGH_ACE_VALUE;
+                else if (aRank == Rank.ACE && meldStart == Rank.ACE)
+                    this.aceValue_ = RunMeld.LOW_ACE_VALUE;
             }
             aRank = aRank == Rank.KING ? Rank.ACE : aRank.getNeighbour(true);
         }

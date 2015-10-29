@@ -23,7 +23,7 @@ import cardgame.player.Selector;
  */
 public class MeldsManager
 {
-    public static final int MINIMUM_MELD_SIZE = 3;
+    static final int MINIMUM_MELD_SIZE = 3;
     
     private final AbstractMeld[] rankMelds_;
     private final AbstractMeld[] runMelds_;
@@ -56,11 +56,11 @@ public class MeldsManager
      * Finds possible plays that can be made with some {@code Card}s, and then
      * prompts the {@code PlayerIO} to pick one.
      * 
-     * @param playerIO the {@code PlayerIO} to interact with
-     * @param hand     the source of the {@code Card}s
-     * @param cards    the {@code Card}s to play
+     * @param aPlayerIO the {@code PlayerIO} to interact with
+     * @param hand      the source of the {@code Card}s
+     * @param cards     the {@code Card}s to play
      */
-    public void play(PlayerIO playerIO, CardCollection hand, Card... cards)
+    public void play(PlayerIO aPlayerIO, CardCollection hand, Card... cards)
     {
         List<PlayOption> optionsList = findPlayOptions(cards);
         int              nOptions    = optionsList.size();
@@ -68,11 +68,11 @@ public class MeldsManager
         if (nOptions > 0) {
             PlayOption[] options = new PlayOption[nOptions];
             options              = optionsList.toArray(options);
-            PlayOption   choice  = Selector.select(playerIO, options);
+            PlayOption   choice  = Selector.select(aPlayerIO, options);
             choice.play(hand);
         }
         else {
-            playerIO.sendMessage("These cards cannot be played anywhere yet.");
+            aPlayerIO.sendMessage("These cards cannot be played anywhere yet.");
         }
     }
     

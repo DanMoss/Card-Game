@@ -7,7 +7,7 @@ import java.util.Scanner;
  * 
  * @see PlayerIO
  */
-class ConsolePlayerIO extends PlayerIO
+public class ConsolePlayerIO extends PlayerIO
 {
     /**
      * Sole constructor.
@@ -26,8 +26,7 @@ class ConsolePlayerIO extends PlayerIO
      * Accepts an integer input from the {@code ConsolePlayerIO}.
      * <p>
      * Opens a scanner for the console and reads user input. When an integer is
-     * entered, it is checked to see if is in the required range. Closes the
-     * scanner once a valid integer is found.
+     * entered, it is checked to see if is in the required range.
      * 
      * @see PlayerIO#chooseInt(int, int)
      * @see java.util.Scanner
@@ -53,8 +52,6 @@ class ConsolePlayerIO extends PlayerIO
             if (!validInput)
                 sendMessage(notInRange);
         } while (!validInput);
-        
-        scanner.close();
         
         return input;
     }

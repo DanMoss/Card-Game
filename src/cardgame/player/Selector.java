@@ -12,7 +12,8 @@ public class Selector
     private Selector() {}
     
     /**
-     * Returns a {@code Selectable} from a specified list of {Selectable}s.
+     * Returns a {@code Selectable} from a specified list of
+     * {@code Selectable}s.
      * <p>
      * Given a list of {@code Selectable} {@code options}, a formatted string
      * message is constructed to detail the choices. This message is passed
@@ -27,7 +28,7 @@ public class Selector
     public static <Type extends Selectable> Type
         select(PlayerIO aPlayerIO, Type[] options)
     {
-        String message = constructMessage(options);
+        String message = Selector.constructMessage(options);
         aPlayerIO.sendMessage(message);
         aPlayerIO.sendMessage("Please make your choice:");
         int choice = aPlayerIO.chooseInt(0, options.length);

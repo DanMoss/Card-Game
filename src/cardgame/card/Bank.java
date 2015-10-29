@@ -6,17 +6,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import cardgame.player.Selectable;
-
 /**
  * A bank of cards.
  * 
  * @see Card
  * @see Drawable
- * @see Selectable
  */
 public class Bank
-    implements Drawable, Selectable
+    implements Drawable
 {
     private final String     name_;
     private final List<Card> cards_;
@@ -44,7 +41,7 @@ public class Bank
     /**
      * Returns the {@code Card} located at {@code index}.
      * 
-     * @param index the index of the {@code Card}
+     * @param  index the index of the {@code Card}
      * @return the {@code Card} located at {@code index}
      */
     public Card getCard(int index)
@@ -70,6 +67,9 @@ public class Bank
         this.cards_.add(aCard);
     }
     
+    /* (non-Javadoc)
+     * @see CardCollection#remove(Card)
+     */
     @Override
     public boolean remove(Card aCard)
     {
@@ -83,6 +83,15 @@ public class Bank
     public void reset()
     {
         this.cards_.clear();
+    }
+    
+    /* (non-Javadoc)
+     * @see cardgame.player.Selectable#getMessage()
+     */
+    @Override
+    public String getMessage()
+    {
+        return toString();
     }
     
     /**
@@ -105,15 +114,6 @@ public class Bank
         return aCard;
     }
     
-    /* (non-Javadoc)
-     * @see cardgame.player.Selectable#getMessage()
-     */
-    @Override
-    public String getMessage()
-    {
-        return toString();
-    }
-    
     /**
      * Shuffles this {@code Bank}.
      * <p>
@@ -122,13 +122,26 @@ public class Bank
      * {@code Collections} class to shuffle the {@code Card}s in this
      * {@code Bank}.
      * 
+     * @see Drawable#shuffle()
      * @see java.util.Random#Random()
      * @see java.util.Collections#shuffle(List, Random)
      */
+    @Override
     public void shuffle()
     {
         Random rng = new Random();
         Collections.shuffle(this.cards_, rng);
+    }
+    
+    /**
+     * Adds a {@code Card} to this {@code Bank} at the specified {@code index}.
+     * 
+     * @param index the index to add the {@code Card} to
+     * @param aCard the {@code Card} to add
+     */
+    public void add(int index, Card aCard)
+    {
+        this.cards_.add(index, aCard);
     }
     
     /**

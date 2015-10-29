@@ -1,11 +1,12 @@
 package cardgame.card;
 
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * A deck of cards.
@@ -17,9 +18,9 @@ import java.util.NoSuchElementException;
 public class Deck
     implements Drawable, DeckEventSource
 {
-    private       EnumSet<Rank>           ranks_;
-    private       EnumSet<Suit>           suits_;
-    private final Deque<Card>             cards_;
+    private       Set<Rank>               ranks_;
+    private       Set<Suit>               suits_;
+    private final List<Card>              cards_;
     private final List<DeckEventListener> listeners_;
     
     /**
@@ -28,7 +29,7 @@ public class Deck
      */
     public Deck()
     {
-        this.cards_     = new LinkedList<Card>();
+        this.cards_     = new ArrayList<Card>();
         this.listeners_ = new ArrayList<DeckEventListener>();
         this.ranks_     = EnumSet.range(Rank.ACE, Rank.KING);
         this.suits_     = EnumSet.range(Suit.CLUBS, Suit.SPADES);
@@ -42,7 +43,7 @@ public class Deck
      * @param ranks the {@code Rank}s to use in this {@code Deck}
      * @see   #reset()
      */
-    public void setRanks(EnumSet<Rank> ranks)
+    public void setRanks(Set<Rank> ranks)
     {
         this.ranks_ = ranks;
         this.reset();
@@ -51,12 +52,11 @@ public class Deck
     /**
      * Sets the {@code Suit}s to be used by this {@code Deck}. This
      * {@code Deck} will then be reset.
-     * this.
      * 
      * @param suits the {@code Suit}s to use in this {@code Deck}
      * @see   #reset()
      */
-    public void setSuits(EnumSet<Suit> suits)
+    public void setSuits(Set<Suit> suits)
     {
         this.suits_ = suits;
         this.reset();
@@ -103,16 +103,21 @@ public class Deck
     @Override
     public void reset()
     {
-        int nCards = cards_.size();
-        for (int i = 0; i < nCards; i++)
-            this.draw();
-        
+        this.cards_.clear();
         for (Suit aSuit : suits_) {
             for (Rank aRank : ranks_)
                 this.add(new Card(aRank, aSuit));
         }
-        
         notifyListeners();
+    }
+    
+    /* (non-Javadoc)
+     * @see cardgame.player.Selectable#getMessage()
+     */
+    @Override
+    public String getMessage()
+    {
+        return "A deck of cards";
     }
     
     /**
@@ -122,18 +127,38 @@ public class Deck
      * @see Drawable#draw()
      * @see #notifyListeners()
      */
+    @Override
     public Card draw()
         throws NoSuchElementException
     {
         Card aCard;
         try {
-            aCard = this.cards_.remove();
+            aCard = this.cards_.remove(0);
             notifyListeners();
         }
-        catch (NoSuchElementException exception) {
+        catch (IndexOutOfBoundsException exception) {
             throw new NoSuchElementException("No cards left in the deck.");
         }
         return aCard;
+    }
+    
+    /**
+     * Shuffles this {@code Deck}.
+     * <p>
+     * Creates a new random number generator using the standard library
+     * {@code Random} class. This generator is then fed to the standard library
+     * {@code Collections} class to shuffle the {@code Card}s in this
+     * {@code Deck}.
+     * 
+     * @see Drawable#shuffle()
+     * @see java.util.Random#Random()
+     * @see java.util.Collections#shuffle(List, Random)
+     */
+    @Override
+    public void shuffle()
+    {
+        Random rng = new Random();
+        Collections.shuffle(this.cards_, rng);
     }
 
     /* (non-Javadoc)

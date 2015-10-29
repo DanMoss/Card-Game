@@ -1,118 +1,122 @@
 package cardgame.games.acestokings;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.EnumSet;
+import java.util.Set;
 
 import cardgame.card.Bank;
+import cardgame.card.Card;
+import cardgame.card.CardCollection;
 import cardgame.card.Deck;
+import cardgame.card.DeckEventListener;
+import cardgame.card.Drawable;
 import cardgame.card.Rank;
-import cardgame.events.EventListener;
-import cardgame.events.EventSource;
 import cardgame.games.acestokings.melds.MeldsManager;
-import cardgame.player.Player;
+import cardgame.player.PlayerIO;
+import cardgame.player.Selector;
 
+/**
+ * An Aces to Kings game board. Holds melds, the deck, and the discard pile.
+ * 
+ * @see cardgame.games.acestokings.melds.MeldsManager
+ * @see cardgame.card.Deck
+ * @see cardgame.card.Bank
+ */
 class Board
-    implements EventListener
+    implements DeckEventListener
 {
-    private static final int    HAND_SIZE = 7;
-    private static final String DISCARDS  = "Discard pile";
+    private static final int    INITIAL_HAND_SIZE = 7;
+    private static final String DISCARDS          = "The discard pile";
     
-    private Bank          deck_;
-    private Bank          discards_;
-    private MeldsManager      melds_;
-    private List<EventSource> eventSources_;
-    private int               roundCount_;
-    private int               startingPlayer_;
+    private final Deck         deck_;
+    private final Bank         discards_;
+    private final MeldsManager melds_;
+    private       Rank         nextJoker_;
+    private       boolean      drewFromDiscards_;
     
-    // Constructor
-    public Board(int nPlayers)
+    // Sole constructor
+    Board()
     {
-        eventSources_   = new ArrayList<EventSource>();
-        roundCount_     = 0;
-        Random rng      = new Random();
-        startingPlayer_ = rng.nextInt(nPlayers);
+        this.deck_      = new Deck();
+        this.deck_.addListener(this);
+        this.discards_  = new Bank(Board.DISCARDS);
+        this.melds_     = new MeldsManager();
+        this.nextJoker_ = Rank.ACE;
     }
     
-    // Accessors
-    public Rank getJokerRank()
+    /**
+     * On being notified, refills the {@code Deck} with all but the top
+     * {@code Card} of the discard pile. The {@code Deck} is then shuffled.
+     * 
+     * @see cardgame.card.DeckEventListener#onNotification()
+     */
+    public void onNotification()
     {
-        return Rank.values()[roundCount_];
-    }
-    
-    public Bank getDeck()
-    {
-        return deck_;
-    }
-    
-    public Bank getDiscards()
-    {
-        return discards_;
-    }
-    
-    public MeldsManager getMelds()
-    {
-        return melds_;
-    }
-    
-    // Sets the board up for the next round to start
-    public int initialiseRound(List<Player> players)
-    {
-        stopListening();
-        deck_     = new Deck();
-        discards_ = new Bank(DISCARDS);
-        deal(players);
-        startListening(deck_);
-        
-        melds_          = new MeldsManager(getJokerRank());
-        startingPlayer_ = (startingPlayer_ + 1) % players.size();
-        roundCount_++;
-        
-        return startingPlayer_;
-    }
-    
-    // Deals {@code HAND_SIZE} cards to all {@code players} then takes the top
-    // card of the deck and places it on the discard pile.
-    private void deal(List<Player> players)
-    {
-        deck_.shuffle();
-        int nPlayers = players.size();
-        for (int i = 0; i < nPlayers; i++) {
-            Bank hand = players.get(i).findBank(CardBanks.HAND);
-            hand.transferFrom(deck_, 0, HAND_SIZE);
-        }
-        discards_.transferFrom(deck_, 0, 1);
-    }
-    
-    // Implementation of EventListener
-    // Shuffles the discard pile into the deck when it is out of cards, leaving
-    // the last discarded card on the discard pile for the next players turn.
-    public void update()
-    {
-        if (deck_.isEmpty()) {
-            deck_.transferFrom(discards_, 1, discards_.size() - 1);
-            deck_.shuffle();
+        int nCardsLeft = this.deck_.size();
+        if (nCardsLeft == 0) {
+            Card topCard      = this.discards_.draw();
+            int  discardsSize = this.discards_.size();
+            for (int i = 0; i < discardsSize; i++) {
+                Card aCard = this.discards_.getCard(0);
+                this.discards_.transferTo(this.deck_, aCard);
+            }
+            this.deck_.shuffle();
+            this.discards_.add(topCard);
         }
     }
     
-    // Starts listening to {@code source}
-    public void startListening(EventSource source)
+    // Sets up the board for the start of the next round.
+    // 
+    // More specifically; all {@code Card}s on this {@code Board} are removed
+    // and the {@code Deck} is refilled, then the {@code Rank} of the jokers
+    // is updated, and finally the {@code Deck} is shuffled with the top
+    // {@code Card} placed on the discard pile.
+    void setUpRound()
     {
-        source.addListener(this);
-        eventSources_.modify(source);
+        this.deck_.reset();
+        this.discards_.reset();
+        this.melds_.reset();
+        Set<Rank> ranks = EnumSet.complementOf(EnumSet.of(this.nextJoker_));
+        this.deck_.setRanks(ranks);
+        this.deck_.shuffle();
+        this.nextJoker_ = this.nextJoker_.getNeighbour(true);
+        this.discards_.add(this.deck_.draw());
     }
     
-    // Stops listening to {@code source}
-    public void stopListening(EventSource source)
+    // Deals the initial hand to a {@code CardCollection}.
+    void dealInitialHand(CardCollection hand)
     {
-        source.removeListener(this);
-        eventSources_.remove(source);
+        for (int i = 0; i < Board.INITIAL_HAND_SIZE; i++)
+            hand.add(this.deck_.draw());
     }
     
-    // Stops listening entirely
-    public void stopListening()
+    // Prompts a {@code PlayerIO} to choose a {@code Drawable} to draw from,
+    // and then returns the drawn {@code Card}.
+    Card draw(PlayerIO aPlayerIO)
     {
-        for (int i = 0; i < eventSources_.size(); i++)
-            stopListening(eventSources_.get(i));
+        String message = "Would you like to draw from the deck, or take the "
+                       + this.discards_.getCard(0) + " from the discard pile?";
+        aPlayerIO.sendMessage(message);
+        Drawable[] options = {this.deck_, this.discards_};
+        Drawable   choice  = Selector.select(aPlayerIO, options);
+        this.drewFromDiscards_ = choice == this.discards_ ? true : false;
+        return choice.draw();
+    }
+    
+    // Checks if the last {@code Card} drawn was from the discard pile.
+    boolean checkIfLastDrewFromDiscards()
+    {
+        return this.drewFromDiscards_;
+    }
+    
+    // Wrapper for the play method in MeldsManager.
+    void playToMeld(PlayerIO aPlayerIO, CardCollection hand, Card... cards)
+    {
+        this.melds_.play(aPlayerIO, hand, cards);
+    }
+    
+    // Discards the specified {@code Card} to the discard pile.
+    void addToDiscards(Card aCard)
+    {
+        this.discards_.add(0, aCard);
     }
 }

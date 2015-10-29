@@ -1,5 +1,6 @@
 package cardgame.games.acestokings.melds;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cardgame.card.Card;
@@ -19,7 +20,7 @@ class PlayOption
 {
     private final AbstractMeld meld_;
     private final Card[]       cards_;
-    private       List<Rank>   jokers_;
+    private final List<Rank>   jokers_;
     private       int          aceValue_;
     private       Rank         startingRank_;
     private       boolean      runMeldVariablesSet_;
@@ -37,6 +38,7 @@ class PlayOption
         this.meld_                = aMeld;
         this.cards_               = cards;
         this.runMeldVariablesSet_ = false;
+        this.jokers_              = new ArrayList<Rank>();
     }
     
     /**
@@ -82,7 +84,7 @@ class PlayOption
      */
     protected void setJokers(List<Rank> jokerRanks)
     {
-        this.jokers_              = jokerRanks;
+        this.jokers_.addAll(jokerRanks);
         this.runMeldVariablesSet_ = true;
     }
     
