@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import cardgame.card.Card;
+import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
 import cardgame.card.Rank;
 import cardgame.card.Suit;
@@ -16,7 +16,7 @@ import cardgame.card.Suit;
  * high or low.
  * 
  * @see AbstractMeld
- * @see Card
+ * @see PlayingCard
  * @see Suit
  */
 class RunMeld extends AbstractMeld
@@ -24,33 +24,33 @@ class RunMeld extends AbstractMeld
     private static final int HIGH_ACE_VALUE = Rank.KING.getValue() + 1;
     private static final int LOW_ACE_VALUE  = Rank.TWO.getValue()  - 1;
     
-    private final Suit       meldSuit_;
-    private final List<Card> cards_;
-    private final List<Card> jokers_;
-    private final List<Rank> ranks_;
+    private final Suit              meldSuit_;
+    private final List<PlayingCard> cards_;
+    private final List<PlayingCard> jokers_;
+    private final List<Rank>        ranks_;
     // the ranks jokers in this meld are mimicking
-    private final List<Rank> jokerRanks_;
+    private final List<Rank>        jokerRanks_;
     
     // the next ranks that jokers added will mimic
-    private List<Rank> playOptionJokers_;
+    private List<Rank>  playOptionJokers_;
     // whether aces have been fixed to be low/high yet
-    private boolean    aceIsFinalised_;
+    private boolean     aceIsFinalised_;
     // determines whether aces are low/high
-    private int        aceValue_;
+    private int         aceValue_;
     // the last card removed by remove(Card) from this meld
-    private Card       lastRemovedCard_;
+    private PlayingCard lastRemovedCard_;
     
     /**
      * Sole constructor.
      * 
-     * @param meldSuit the {@code Suit} of {@code Card}s that the
+     * @param meldSuit the {@code Suit} of {@code PlayingCard}s that the
      *                 {@code RunMeld} can accept
      */
     protected RunMeld(Suit meldSuit)
     {
         this.meldSuit_         = meldSuit;
-        this.cards_            = new ArrayList<Card>();
-        this.jokers_           = new ArrayList<Card>();
+        this.cards_            = new ArrayList<PlayingCard>();
+        this.jokers_           = new ArrayList<PlayingCard>();
         this.ranks_            = new ArrayList<Rank>();
         this.jokerRanks_       = new ArrayList<Rank>();
         this.playOptionJokers_ = new ArrayList<Rank>();
@@ -58,16 +58,17 @@ class RunMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#play(cardgame.card.CardCollection, PlayOption)
+     * @see AbstractMeld#play(CardCollection, PlayOption)
      */
-    protected void play(CardCollection collection, PlayOption anOption)
+    protected void play(CardCollection<PlayingCard> collection,
+                        PlayOption anOption)
     {
-        Card[] cards           = anOption.getCards();
+        PlayingCard[] cards    = anOption.getCards();
         this.playOptionJokers_ = anOption.getJokers();
         if (!this.aceIsFinalised_)
             this.aceValue_ = anOption.getAceValue();
         
-        for (Card aCard : cards) {
+        for (PlayingCard aCard : cards) {
             boolean canPickUpJoker = this.remove(aCard);
             if (canPickUpJoker)
                 collection.add(this.lastRemovedCard_);
@@ -76,26 +77,28 @@ class RunMeld extends AbstractMeld
     }
     
     /** 
-     * Finds the possible positions that a {@code Card} can be added to in this
-     * {@code RunMeld}, then appends them to a list of {@code PlayOption}s.
+     * Finds the possible positions that a {@code PlayingCard} can be added to
+     * in this {@code RunMeld}, then appends them to a list of
+     * {@code PlayOption}s.
      * <p>
-     * Firstly checks that the {@code Card} is of the correct {@code Suit}.
-     * Then checks if there is an open position at the edge of a meld within
-     * this {@code RunMeld}. Jokers can not be placed into a position that is
-     * already occupied by the {@code Card} the joker would attempt to mimic.
+     * Firstly checks that the {@code PlayingCard} is of the correct
+     * {@code Suit}. Then checks if there is an open position at the edge of a
+     * meld within this {@code RunMeld}. Jokers can not be placed into a
+     * position that is already occupied by the {@code PlayingCard} the joker
+     * would attempt to mimic.
      * 
-     * @see AbstractMeld#addCardPlays(java.util.List, cardgame.card.Card)
+     * @see AbstractMeld#addCardPlays(List, PlayingCard)
      */
-    protected void addCardPlays(List<PlayOption> options, Card aCard)
+    protected void addCardPlays(List<PlayOption> options, PlayingCard aCard)
     {
         boolean correctSuit = checkSuits(aCard);
         
         if (correctSuit && isJoker(aCard)) {
             Set<Rank> ranks = EnumSet.range(Rank.ACE, Rank.KING);
             for (Rank aRank : ranks) {
-                Card    mimickedCard    = new Card(aRank, meldSuit_);
-                boolean mimickedPresent = this.cards_.contains(mimickedCard);
-                boolean neighboursExist = checkForNeighbours(aCard);
+                PlayingCard mimickedCard = new PlayingCard(aRank, meldSuit_);
+                boolean  mimickedPresent = this.cards_.contains(mimickedCard);
+                boolean  neighboursExist = checkForNeighbours(aCard);
                 
                 if (neighboursExist && !mimickedPresent) {
                     this.playOptionJokers_.add(aRank);
@@ -112,19 +115,19 @@ class RunMeld extends AbstractMeld
     
     /** 
      * Finds the possible melds that can be played to this {@code RunMeld} with
-     * a set of {@code Card}s, then appends them to a list of
+     * a set of {@code PlayingCard}s, then appends them to a list of
      * {@code PlayOption}s.
      * <p>
-     * Firstly checks that the {@code Card}s are of the correct {@code Suit}
-     * and that they form a run. Then potential starting locations of the run
-     * are identified based on the kinds of {@code Card}s in the run.
-     * Afterwards a check is made to see if all specified jokers can be
-     * appropriately added to this {@code RunMeld} without removing the actual
-     * {@code Card} they would be mimicking.
+     * Firstly checks that the {@code PlayingCard}s are of the correct
+     * {@code Suit} and that they form a run. Then potential starting locations
+     * of the run are identified based on the kinds of {@code PlayingCard}s in
+     * the run. Afterwards a check is made to see if all specified jokers can 
+     * be appropriately added to this {@code RunMeld} without removing the 
+     * actual {@code PlayingCard} they would be mimicking.
      * 
-     * @see AbstractMeld#addMeldPlays(java.util.List, cardgame.card.Card[])
+     * @see AbstractMeld#addMeldPlays(List, PlayingCard[])
      */
-    protected void addMeldPlays(List<PlayOption> options, Card... cards)
+    protected void addMeldPlays(List<PlayOption> options, PlayingCard... cards)
     {
         if (checkRun(cards) && checkSuits(cards)) {
             Set<Rank> viableMeldStarts = findMeldStarts(cards);
@@ -139,15 +142,15 @@ class RunMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#toString()
+     * @see Selectable#getMessage()
      */
-    public String toString()
+    public String getMessage()
     {
         return "a run of " + meldSuit_;
     }
     
     /* (non-Javadoc)
-     * @see cardgame.card.CardCollection#size()
+     * @see CardCollection#size()
      */
     public int size()
     {
@@ -155,14 +158,14 @@ class RunMeld extends AbstractMeld
     }
     
     /**
-     * Attempts to add a {@code Card} to this {@code RunMeld}.
+     * Attempts to add a {@code PlayingCard} to this {@code RunMeld}.
      * <p>
-     * If the {@code Card} is a joker, then the {@code Rank} is taken from a
-     * list of upcoming jokers.
+     * If the {@code PlayingCard} is a joker, then the {@code Rank} is taken
+     * from a list of upcoming jokers.
      * 
-     * @see cardgame.card.CardCollection#add(cardgame.card.Card)
+     * @see CardCollection#add(PlayingCard)
      */
-    public void add(Card aCard)
+    public void add(PlayingCard aCard)
     {
         Rank rank;
         if (isJoker(aCard)) {
@@ -182,16 +185,17 @@ class RunMeld extends AbstractMeld
     }
     
     /**
-     * Attempts to remove a {@code Card} from this {@code RunMeld}.
+     * Attempts to remove a {@code PlayingCard} from this {@code RunMeld}.
      * <p>
-     * First checks if the {@code Card} or a joker mimicking the {@code Card}
-     * is in this {@code RunMeld}. If it is, then either the {@code Card} or a
-     * joker is removed appropriately. The removed card is stored as the field
-     * {@code lastRemovedCard_} for potential uses elsewhere.
+     * First checks if the {@code PlayingCard} or a joker mimicking the 
+     * {@code PlayingCard} is in this {@code RunMeld}. If it is, then either
+     * the {@code PlayingCard} or a joker is removed appropriately. The removed
+     * {@code PlayingCard} is stored as the field {@code lastRemovedCard_} for
+     * potential uses elsewhere.
      * 
-     * @see cardgame.card.CardCollection#remove(cardgame.card.Card)
+     * @see CardCollection#remove(PlayingCard)
      */
-    public boolean remove(Card aCard)
+    public boolean remove(PlayingCard aCard)
     {
         Rank    rank     = aCard.getRank();
         boolean isInMeld = this.ranks_.contains(rank);
@@ -202,7 +206,7 @@ class RunMeld extends AbstractMeld
             if (isAJoker)
                 this.lastRemovedCard_ = this.jokers_.remove(0);
             else
-                this.lastRemovedCard_ = new Card(rank, this.meldSuit_);
+                this.lastRemovedCard_ = new PlayingCard(rank, this.meldSuit_);
             cardRemoved = this.cards_.remove(this.lastRemovedCard_);
         }
         else {
@@ -213,7 +217,7 @@ class RunMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see cardgame.card.CardCollection#reset()
+     * @see CardCollection#reset()
      */
     public void reset()
     {
@@ -225,12 +229,12 @@ class RunMeld extends AbstractMeld
         this.aceIsFinalised_ = false;
     }
     
-    // Checks if some given {@code Card}s are all of the correct {@code Suit}
-    // for addition to this {@code RunMeld}.
-    private boolean checkSuits(Card... cards)
+    // Checks if some given {@code PlayingCard}s are all of the correct
+    // {@code Suit} for addition to this {@code RunMeld}.
+    private boolean checkSuits(PlayingCard... cards)
     {
         boolean allCorrect = true;
-        for (Card aCard : cards) {
+        for (PlayingCard aCard : cards) {
             boolean singleCorrect = aCard.getSuit() == this.meldSuit_;
             singleCorrect         = singleCorrect   || isJoker(aCard);
             allCorrect            = allCorrect      && singleCorrect;
@@ -238,9 +242,10 @@ class RunMeld extends AbstractMeld
         return allCorrect;
     }
     
-    // Checks if some given {@code Card}s form an ascending run by checking
-    // that each {@code Card} is consecutive with the one after it.
-    private boolean checkRun(Card... cards)
+    // Checks if some given {@code PlayingCard}s form an ascending run by
+    // checking that each {@code PlayingCard} is consecutive with the one after
+    // it.
+    private boolean checkRun(PlayingCard... cards)
     {
         boolean isARun = true;
         int     nCards = cards.length;
@@ -250,16 +255,16 @@ class RunMeld extends AbstractMeld
         return isARun;
     }
     
-    // Checks if the specified {@code Card}s are consecutive.
+    // Checks if the specified {@code PlayingCard}s are consecutive.
     //
     // More specifically, checks if {@code card1} directly follows
     // {@code card2}. If either of the {@code Card}s is a joker, then the
-    // {@code Card}s are treated as consecutive.
+    // {@code PlayingCard}s are treated as consecutive.
     //
-    // @param  card1 the speculative first {@code Card}
-    // @param  card2 the speculative following {@code Card}
-    // @return true if the {@code Card}s are consecutive
-    private boolean checkConsecutiveCards(Card card1, Card card2)
+    // @param  card1 the speculative first {@code PlayingCard}
+    // @param  card2 the speculative following {@code PlayingCard}
+    // @return true if the {@code PlayingCard}s are consecutive
+    private boolean checkConsecutiveCards(PlayingCard card1, PlayingCard card2)
     {
         boolean jokerPresent = isJoker(card1) || isJoker(card2);
         boolean consecutiveCards;
@@ -321,17 +326,19 @@ class RunMeld extends AbstractMeld
         return consecutiveRanks;
     }
     
-    // Checks if the given {@code Card} could have neighbours upon being added
-    // to this {@code RunMeld}. Having neighbours is a necessary requirement of
-    // playing {@code Card}s one at a time.
+    // Checks if the given {@code PlayingCard} could have neighbours upon being
+    // added to this {@code RunMeld}. Having neighbours is a necessary
+    // requirement of playing {@code PlayingCard}s one at a time.
     //
     // To check for neighbours, the method iterates through the list of
     // {@code Rank}s in this {@code RunMeld}. {@code Rank}s are compared to the
-    // {@code Rank} of the given {@code Card} to see if they are neighbours.
+    // {@code Rank} of the given {@code PlayingCard} to see if they are
+    // neighbours.
     // 
-    // @param  aCard the {@code Card} to check for neighbours
-    // @return true  if the {@code Card} could have a neighbour after placement
-    private boolean checkForNeighbours(Card aCard)
+    // @param  aCard the {@code PlayingCard} to check for neighbours
+    // @return true if the {@code PlayingCard} could have a neighbour after
+    //         placement
+    private boolean checkForNeighbours(PlayingCard aCard)
     {
         Rank    rank1         = aCard.getRank();
         boolean isNextToAMeld = false;
@@ -346,8 +353,9 @@ class RunMeld extends AbstractMeld
         return isNextToAMeld;
     }
     
-    // Finds the potential starting {@code Rank}s of a run of {@code Card}s.
-    private Set<Rank> findMeldStarts(Card... cards)
+    // Finds the potential starting {@code Rank}s of a run of
+    // {@code PlayingCard}s.
+    private Set<Rank> findMeldStarts(PlayingCard... cards)
     {
         boolean nonJokerFound = false;
         int     nonJokerIndex = 0;
@@ -375,7 +383,7 @@ class RunMeld extends AbstractMeld
     }
     
     // Finds the potential range of starting {@code Rank}s of a run of
-    // {@code Card}s which consists solely of jokers.
+    // {@code PlayingCard}s which consists solely of jokers.
     private Set<Rank> generateAllJokerStart(int nCards)
     {
         // If the ace is finalised and high, then we cannot put a joker in the
@@ -392,7 +400,7 @@ class RunMeld extends AbstractMeld
     }
     
     // Finds the single potential starting {@code Rank} of a run of
-    // {@code Card}s which does not consist solely of jokers.
+    // {@code PlayingCard}s which does not consist solely of jokers.
     private Set<Rank> findNonJokerStart(Rank nonJokerRank, int nonJokerIndex)
     {
         for (int i = 0; i < nonJokerIndex; i++)
@@ -400,26 +408,27 @@ class RunMeld extends AbstractMeld
         return EnumSet.of(nonJokerRank);
     }
     
-    // Verifies that all of the jokers in a run of {@code Card}s can be placed
-    // appropriately in this {@RunMeld} according to the {@code Card}s they are
-    // mimicking.
+    // Verifies that all of the jokers in a run of {@code PlayingCard}s can be
+    // placed appropriately in this {@RunMeld} according to the
+    // {@code PlayingCard}s they are mimicking.
     // 
     // Additionally, jokers are added to a list of jokers for use in the
     // creation of a {@code PlayOption} at a later time, assuming the run can
     // placed.
     // 
     // @param  meldStart the initial {@code Rank} the run is starting from
-    // @param  cards     the {@code Card}s that make up the run
+    // @param  cards     the {@code PlayingCard}s that make up the run
     // @return true if the run may be placed here
-    private boolean verifyMeldStart(Rank meldStart, Card... cards)
+    private boolean verifyMeldStart(Rank meldStart, PlayingCard... cards)
     {
         Rank    aRank    = meldStart;
         boolean canPlace = true;
         
-        for (Card aCard : cards) {
+        for (PlayingCard aCard : cards) {
             if (isJoker(aCard)) {
                 this.playOptionJokers_.add(aRank);
                 canPlace = canPlace && !this.ranks_.contains(aRank);
+                
                 // Jokers skip the setting of the ace value elsewhere
                 if (aRank == Rank.ACE && meldStart != Rank.ACE)
                     this.aceValue_ = RunMeld.HIGH_ACE_VALUE;
@@ -442,9 +451,10 @@ class RunMeld extends AbstractMeld
     //
     // @param options the list of {@code PlayOptions} to append
     // @param aRank   the first rank of this run
-    // @param cards   the {@code Card}s that could be played by the created
-    //                {@code PlayOption}
-    private void addOption(List<PlayOption> options, Rank aRank, Card... cards)
+    // @param cards   the {@code PlayingCard}s that could be played by the
+    //                created {@code PlayOption}
+    private void addOption(List<PlayOption> options, Rank aRank,
+                           PlayingCard... cards)
     {
         PlayOption anOption = new PlayOption(this, cards);
         anOption.setJokers(this.playOptionJokers_);

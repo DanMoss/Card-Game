@@ -4,24 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import cardgame.card.Bank;
+import cardgame.card.Card;
+import cardgame.card.Hand;
 
 /**
  * A player of card games.
  * 
- * @see PlayerIO
- * @see Points
- * @see cardgame.card.Bank
+ * @param <T> the type of {@code Card}s this {@code Player} will use
+ * @see   PlayerIO
+ * @see   Points
+ * @see   cardgame.card.Hand
  */
-public class Player
-    implements Comparable<Player>
+public class Player<T extends Card>
+    implements Comparable<Player<?>>
 {
     private static int nPlayers_ = 0;
     
-    private String     name_;
-    private PlayerIO   playerIO_;
-    private Points     points_;
-    private List<Bank> banks_;
+    private final String        name_;
+    private final PlayerIO      playerIO_;
+    private final Points        points_;
+    private final List<Hand<T>> hands_;
     
     /**
      * Secondary constructor. Provides the {@code Player} with a default name
@@ -34,7 +36,7 @@ public class Player
      */
     public Player(PlayerIO aPlayerIO, int nPoints, int minPoints)
     {
-        this("Player " + nPlayers_, aPlayerIO, nPoints, minPoints);
+        this("Player " + Player.nPlayers_, aPlayerIO, nPoints, minPoints);
     }
     
     /**
@@ -51,7 +53,7 @@ public class Player
         this.name_     = name;
         this.playerIO_ = aPlayerIO;
         this.points_   = new Points(nPoints, minPoints);
-        this.banks_    = new ArrayList<Bank>();
+        this.hands_    = new ArrayList<Hand<T>>();
         nPlayers_++;
     }
     
@@ -107,7 +109,7 @@ public class Player
      * @param aPlayer the {@code Player} to be compared with
      * @see   java.lang.Comparable#compareTo(java.lang.Object)
      */
-    public int compareTo(Player aPlayer)
+    public int compareTo(Player<?> aPlayer)
     {
         Integer thisPoints  = new Integer(this.getPointTotal());
         Integer otherPoints = new Integer(aPlayer.getPointTotal());
@@ -118,48 +120,48 @@ public class Player
     }
     
     /**
-     * Gives this {@code Player} a specified {@code Bank}.
+     * Gives this {@code Player} a specified {@code Hand}.
      * 
-     * @param aBank the {@code Bank} to give this {@code Player}
+     * @param aHand the {@code Hand} to give this {@code Player}
      */
-    public void addBank(Bank aBank)
+    public void addHand(Hand<T> aHand)
     {
-        this.banks_.add(aBank);
+        this.hands_.add(aHand);
     }
     
     /**
-     * Returns the first occurrence of an owned {@code Bank} with the specified
+     * Returns the first occurrence of an owned {@code Hand} with the specified
      * name.
      * <p>
-     * Searches through this {@code Player}'s {@code Bank}s. When a
-     * {@code Bank} is found with a name matching that of {@code aName}, it is
+     * Searches through this {@code Player}'s {@code Hand}s. When a
+     * {@code Hand} is found with a name matching that of {@code aName}, it is
      * returned.
      * 
-     * @param  aName the name of the {@code Bank}
-     * @return the requested {@code Bank}
-     * @throws NoSuchElementException if the named {@code Bank} does not exist
+     * @param  aName the name of the {@code Hand}
+     * @return the requested {@code Hand}
+     * @throws NoSuchElementException if the named {@code Hand} does not exist
      */
-    public Bank findBank(String aName)
+    public Hand<T> findHand(String aName)
         throws NoSuchElementException
     {
-        boolean isFound  = false;
-        int     i        = 0;
-        Bank    testBank = new Bank("temp"); // Initialisation for returning
+        boolean isFound = false;
+        int     index   = 0;
+        Hand<T> aHand   = new Hand<T>(""); // Initialisation for returning
         
         while (!isFound) {
             try {
-                testBank = this.banks_.get(i);
+                aHand = this.hands_.get(index);
             }
             catch (IndexOutOfBoundsException exception) {
-                throw new NoSuchElementException("That bank does not exist!");
+                throw new NoSuchElementException("That hand does not exist!");
             }
             
-            String testName = testBank.toString();
-            if (testName.equals(aName))
+            String handName = aHand.toString();
+            if (handName.equals(aName))
                 isFound = true;
-            i++;
+            index++;
         }
         
-        return testBank;
+        return aHand;
     }
 }

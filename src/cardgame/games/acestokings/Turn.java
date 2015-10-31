@@ -1,8 +1,8 @@
 package cardgame.games.acestokings;
 
-import cardgame.card.Bank;
-import cardgame.card.Card;
 import cardgame.card.CardCollection;
+import cardgame.card.Hand;
+import cardgame.card.PlayingCard;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
 
@@ -11,13 +11,13 @@ import cardgame.player.Selector;
  */
 class Turn
 {
-    private final PlayerIO playerIO_;
-    private final Bank     hand_;
-    private final Board    board_;
-    private       Card     drawnCard_;
+    private final PlayerIO          playerIO_;
+    private final Hand<PlayingCard> hand_;
+    private final Board             board_;
+    private       PlayingCard       drawnCard_;
     
     // Constructor
-    public Turn(PlayerIO aPlayerIO, Bank hand, Board aBoard)
+    public Turn(PlayerIO aPlayerIO, Hand<PlayingCard> hand, Board aBoard)
     {
         this.playerIO_ = aPlayerIO;
         this.hand_     = hand;
@@ -33,7 +33,7 @@ class Turn
         boolean turnOver;
         
         do {
-            this.hand_.sort();
+            this.hand_.sort(null);
             turnOver = processAction(chooseAction());
         } while (!turnOver);
         discard();
@@ -41,13 +41,13 @@ class Turn
         return this.hand_.size() == 0;
     }
     
-    // Discards a {@code Card} from the player's hand. Note that if the
-    // {@code Card} was drawn from the discard pile this turn, then it can not
-    // be discarded this turn.
+    // Discards a {@code PlayingCard} from the player's hand. Note that if the
+    // {@code PlayingCard} was drawn from the discard pile this turn, then it
+    // can not be discarded this turn.
     private void discard()
     {
         boolean cannotDiscard;
-        Card    aCard;
+        PlayingCard aCard;
         boolean drewFromDiscards = this.board_.checkIfLastDrewFromDiscards();
 
         do {
@@ -76,16 +76,21 @@ class Turn
     
     // Prompts the {@code PlayerIO} to choose {@code nCards} from their hand.
     //
-    // A temporary array is created to hold chosen {@code Card}s, which are
-    // removed temporarily to prevent duplicate selections.
-    private Card[] chooseCards(int nCards)
+    // A temporary array is created to hold chosen {@code PlayingCard}s, which
+    // are removed temporarily to prevent duplicate selections.
+    private PlayingCard[] chooseCards(int nCards)
     {
-        CardCollection temp  = new Bank("");
-        Card[]         cards = new Card[nCards];
+        CardCollection<PlayingCard> temp  = new Hand<PlayingCard>("");
+        PlayingCard[]               cards = new PlayingCard[nCards];
         
         for (int i = 0; i < nCards; i++) {
-            Card aCard = Selector.select(this.playerIO_, this.hand_.toArray());
-            cards[i]   = aCard;
+            int           handSize = this.hand_.size();
+            PlayingCard[] array    = new PlayingCard[handSize];
+            for (int j = 0; j < handSize; j++)
+                array[j] = this.hand_.get(j);
+            
+            PlayingCard aCard = Selector.select(this.playerIO_, array);
+            cards[i]          = aCard;
             this.hand_.transferTo(temp, aCard);
         }
         temp.transferTo(this.hand_, cards);
@@ -106,17 +111,17 @@ class Turn
     }
     
     // Checks that the player will still be able to discard after playing the
-    // specified {@code Card}s.
+    // specified {@code PlayingCard}s.
     //
     // Essentially this is enforcing that a player can not discard a card they
     // drew from the discard pile on the turn that they drew it.
-    private boolean verifyCanDiscardAfter(Card... cards)
+    private boolean verifyCanDiscardAfter(PlayingCard... cards)
     {
         boolean drewFromDiscards = this.board_.checkIfLastDrewFromDiscards();
         boolean canDiscardAfter  = true;
         
         if (drewFromDiscards) {
-            CardCollection temp = new Bank("");
+            CardCollection<PlayingCard> temp = new Hand<PlayingCard>("");
             this.hand_.transferTo(temp, cards);
             // Only card left in hand is the drawn card
             if (this.hand_.remove(this.drawnCard_) && this.hand_.size() == 0) {
@@ -146,7 +151,7 @@ class Turn
             else
                 nCardsToPlay = chooseMeldSize();
             
-            Card[] cards = chooseCards(nCardsToPlay);
+            PlayingCard[] cards = chooseCards(nCardsToPlay);
             if (verifyCanDiscardAfter(cards))
                 this.board_.playToMeld(this.playerIO_, this.hand_, cards);
         }

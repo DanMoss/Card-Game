@@ -3,7 +3,7 @@ package cardgame.games.acestokings.melds;
 import java.util.ArrayList;
 import java.util.List;
 
-import cardgame.card.Card;
+import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
 import cardgame.card.Rank;
 
@@ -12,39 +12,40 @@ import cardgame.card.Rank;
  * cards.
  * 
  * @see AbstractMeld
- * @see Card
+ * @see PlayingCard
  * @see Rank
  */
 class RankMeld extends AbstractMeld
 {
     private static final int MELD_CAPACITY = 4;
     
-    private final Rank       meldRank_;
-    private final List<Card> meld_;
-    private final List<Card> jokers_;
+    private final Rank              meldRank_;
+    private final List<PlayingCard> meld_;
+    private final List<PlayingCard> jokers_;
     
     /**
      * Sole constructor.
      * 
-     * @param meldRank the {@code Rank} of {@code Card}s that the
+     * @param meldRank the {@code Rank} of {@code PlayingCard}s that the
      *                 {@code RankMeld} can accept
      */
     protected RankMeld(Rank meldRank)
     {
         this.meldRank_ = meldRank;
-        this.meld_     = new ArrayList<Card>(RankMeld.MELD_CAPACITY);
-        this.jokers_   = new ArrayList<Card>(RankMeld.MELD_CAPACITY);
+        this.meld_     = new ArrayList<PlayingCard>(RankMeld.MELD_CAPACITY);
+        this.jokers_   = new ArrayList<PlayingCard>(RankMeld.MELD_CAPACITY);
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#play(cardgame.card.CardCollection, PlayOption)
+     * @see AbstractMeld#play(CardCollection, PlayOption)
      */
-    protected void play(CardCollection collection, PlayOption option)
+    protected void play(CardCollection<PlayingCard> collection,
+                        PlayOption option)
     {
         // Building the collection of jokers to pick up
-        Card[] cards            = option.getCards();
-        int    nJokersToReplace = countJokersToPickUp(cards);
-        Card[] jokers           = new Card[nJokersToReplace];
+        PlayingCard[] cards            = option.getCards();
+        int           nJokersToReplace = countJokersToPickUp(cards);
+        PlayingCard[] jokers           = new PlayingCard[nJokersToReplace];
         for (int i = 0; i < nJokersToReplace; i++)
             jokers[i] = this.jokers_.get(i);
         
@@ -54,9 +55,9 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#addCardPlays(java.util.List, cardgame.card.Card)
+     * @see AbstractMeld#addCardPlays(java.util.List, PlayingCard)
      */
-    protected void addCardPlays(List<PlayOption> options, Card aCard)
+    protected void addCardPlays(List<PlayOption> options, PlayingCard aCard)
     {
         boolean meldExists = this.size() >= MeldsManager.MINIMUM_MELD_SIZE;
         boolean canPlay    = meldExists  && checkRanks(aCard);
@@ -66,9 +67,9 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#addMeldPlays(java.util.List, cardgame.card.Card[])
+     * @see AbstractMeld#addMeldPlays(java.util.List, PlayingCard[])
      */
-    protected void addMeldPlays(List<PlayOption> options, Card... cards)
+    protected void addMeldPlays(List<PlayOption> options, PlayingCard... cards)
     {
         boolean canPlay = hasSpace(cards) && checkRanks(cards);
         if (canPlay)
@@ -76,16 +77,16 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#toString()
+     * @see Selectable#getMessage()
      */
-    public String toString()
+    public String getMessage()
     {
         return "a set of " + this.meldRank_.getPlural();
     }
     
     
     /* (non-Javadoc)
-     * @see cardgame.card.CardCollection#size()
+     * @see CardCollection#size()
      */
     public int size()
     {
@@ -93,12 +94,12 @@ class RankMeld extends AbstractMeld
     }
     
     /**
-     * Adds a {@code Card} to this {@code RankMeld}. Jokers are also added to
-     * their own list.
+     * Adds a {@code PlayingCard} to this {@code RankMeld}. Jokers are also
+     * added to their own list.
      * 
-     * @see cardgame.card.CardCollection#add(cardgame.card.Card)
+     * @see CardCollection#add(PlayingCard)
      */
-    public void add(Card aCard)
+    public void add(PlayingCard aCard)
     {
         this.meld_.add(aCard);
         if (isJoker(aCard))
@@ -106,12 +107,12 @@ class RankMeld extends AbstractMeld
     }
     
     /**
-     * Removes a {@code Card} from this {@code RankMeld}. Jokers are further
-     * removed from their own list.
+     * Removes a {@code PlayingCard} from this {@code RankMeld}. Jokers are
+     * further removed from their own list.
      * 
-     * @see cardgame.card.CardCollection#remove(cardgame.card.Card)
+     * @see CardCollection#remove(PlayingCard)
      */
-    public boolean remove(Card aCard)
+    public boolean remove(PlayingCard aCard)
     {
         if (isJoker(aCard))
             this.jokers_.remove(aCard);
@@ -119,18 +120,19 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see cardgame.card.CardCollection#reset()
+     * @see CardCollection#reset()
      */
     public void reset()
     {
         this.meld_.clear();
     }
     
-    // Checks that {@code cards} are all of the correct {@code Rank}
-    private boolean checkRanks(Card... cards)
+    // Checks that the specified {@code PlayingCard}s are all of the correct
+    // {@code Rank}.
+    private boolean checkRanks(PlayingCard... cards)
     {
         boolean allCorrect = true;
-        for (Card aCard : cards) {
+        for (PlayingCard aCard : cards) {
             boolean singleCorrect = aCard.getRank() == this.meldRank_;
             singleCorrect         = singleCorrect   || isJoker(aCard);
             allCorrect            = allCorrect      && singleCorrect;
@@ -139,7 +141,7 @@ class RankMeld extends AbstractMeld
     }
     
     // Checks that there is space to play {@code cards}
-    private boolean hasSpace(Card... cards)
+    private boolean hasSpace(PlayingCard... cards)
     {
         int     nJokersToPickUp = countJokersToPickUp(cards);
         int     endMeldSize     = this.size() + cards.length - nJokersToPickUp;
@@ -147,12 +149,13 @@ class RankMeld extends AbstractMeld
         return  withinCapacity;
     }
     
-    // Finds out how many jokers to pick up when playing {@code cards}
-    private int countJokersToPickUp(Card... cards)
+    // Finds out how many jokers to pick up when playing the specified
+    // {@code PlayingCard}s.
+    private int countJokersToPickUp(PlayingCard... cards)
     {
         int nNonJokers = 0;
-        for (Card card : cards) {
-            if (!isJoker(card))
+        for (PlayingCard aCard : cards) {
+            if (!isJoker(aCard))
                 nNonJokers++;
         }
         // Minimum of the number of non-jokers being played and the number of
@@ -163,7 +166,7 @@ class RankMeld extends AbstractMeld
     }
     
     // Appends {@code options} with a new option
-    private void addOption(List<PlayOption> options, Card... cards)
+    private void addOption(List<PlayOption> options, PlayingCard... cards)
     {
         PlayOption anOption = new PlayOption(this, cards);
         options.add(anOption);

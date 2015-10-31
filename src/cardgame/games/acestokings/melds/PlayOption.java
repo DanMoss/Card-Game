@@ -3,7 +3,7 @@ package cardgame.games.acestokings.melds;
 import java.util.ArrayList;
 import java.util.List;
 
-import cardgame.card.Card;
+import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
 import cardgame.card.Rank;
 import cardgame.player.Selectable;
@@ -12,28 +12,28 @@ import cardgame.player.Selectable;
  * A possible play that can be made with some cards to a meld.
  * 
  * @see AbstractMeld
- * @see Card
+ * @see PlayingCard
  * @see Selectable
  */
 class PlayOption
     implements Selectable
 {
-    private final AbstractMeld meld_;
-    private final Card[]       cards_;
-    private final List<Rank>   jokers_;
-    private       int          aceValue_;
-    private       Rank         startingRank_;
-    private       boolean      runMeldVariablesSet_;
+    private final AbstractMeld  meld_;
+    private final PlayingCard[] cards_;
+    private final List<Rank>    jokers_;
+    private       int           aceValue_;
+    private       Rank          startingRank_;
+    private       boolean       runMeldVariablesSet_;
     
     /**
      * Sole constructor.
      * 
-     * @param meld  the destination {@AbstractMeld} for the {@code Card}s in
-     *              the {@code PlayOption}
-     * @param cards the {@code Card}s to play if the {@code PlayOption} is
-     *              selected
+     * @param meld  the destination {@AbstractMeld} for the 
+     *              {@code PlayingCard}s in the {@code PlayOption}
+     * @param cards the {@code PlayingCard}s to play if the {@code PlayOption}
+     *              is selected
      */
-    public PlayOption(AbstractMeld aMeld, Card... cards)
+    public PlayOption(AbstractMeld aMeld, PlayingCard... cards)
     {
         this.meld_                = aMeld;
         this.cards_               = cards;
@@ -42,11 +42,11 @@ class PlayOption
     }
     
     /**
-     * Returns the {@code Card}s that make up this {@code PlayOption}.
+     * Returns the {@code PlayingCard}s that make up this {@code PlayOption}.
      * 
-     * @return the {@code Card}s
+     * @return the {@code PlayingCard}s
      */
-    protected Card[] getCards()
+    protected PlayingCard[] getCards()
     {
         return this.cards_;
     }
@@ -102,8 +102,8 @@ class PlayOption
     }
     
     /**
-     * Sets the first {@code Rank} of the run of {@code Card}s. For use in
-     * {@link #getMessage()}.
+     * Sets the first {@code Rank} of the run of {@code PlayingCard}s. For use
+     * in {@link #getMessage()}.
      * 
      * @param startingRank the first {@code Rank} of the run
      * @see   RunMeld
@@ -115,11 +115,11 @@ class PlayOption
     }
     
     /* (non-Javadoc)
-     * @see cardgame.player.Selectable#getMessage()
+     * @see Selectable#getMessage()
      */
     public String getMessage()
     {
-        String string = "Play to " + this.meld_;
+        String string = "Play to " + this.meld_.getMessage();
         if (this.runMeldVariablesSet_) {
             String multipleCards = " starting with a ";
             String singleCard    = " as the ";
@@ -130,12 +130,12 @@ class PlayOption
     }
     
     /**
-     * Plays the {@code Card}s in this {@code PlayOption} to the
+     * Plays the {@code PlayingCard}s in this {@code PlayOption} to the
      * {@code AbstractMeld}.
      * 
-     * @param collection the source of the {@code Card}s
+     * @param collection the source of the {@code PlayingCard}s
      */
-    protected void play(CardCollection collection)
+    protected void play(CardCollection<PlayingCard> collection)
     {
         this.meld_.play(collection, this);
     }

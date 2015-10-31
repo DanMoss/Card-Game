@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import cardgame.card.Bank;
+import cardgame.card.Hand;
+import cardgame.card.PlayingCard;
 import cardgame.card.Rank;
 import cardgame.player.ConsolePlayerIO;
 import cardgame.player.Player;
@@ -19,14 +20,14 @@ public class Game
     private static final int    ROUNDS_TO_PLAY   = 13;
     private static final String PLAYER_HAND      = "Hand";
     
-    private final List<Player> players_;
-    private final Board        board_;
-    private int                startingPlayer_;
+    private final List<Player<PlayingCard>> players_;
+    private final Board                     board_;
+    private int                             startingPlayer_;
     
     // Constructor
     public Game(int nPlayers)
     {
-        this.players_        = new ArrayList<Player>(nPlayers);
+        this.players_        = new ArrayList<Player<PlayingCard>>(nPlayers);
         this.board_          = new Board();
         Random rng           = new Random();
         this.startingPlayer_ = rng.nextInt(nPlayers);
@@ -39,8 +40,8 @@ public class Game
         int nPlayers = this.players_.size();
         for (int i = 0; i < Game.ROUNDS_TO_PLAY; i++) {
             this.board_.setUpRound();
-            for (Player aPlayer : this.players_)
-                this.board_.dealInitialHand(aPlayer.findBank(Game.PLAYER_HAND));
+            for (Player<PlayingCard> aPlayer : this.players_)
+                this.board_.dealInitialHand(aPlayer.findHand(Game.PLAYER_HAND));
             playTurns();
             distributePoints();
             this.startingPlayer_ = (this.startingPlayer_ + 1) % nPlayers;
@@ -54,27 +55,30 @@ public class Game
         int     currentPlayer = startingPlayer_;
         int     nPlayers      = this.players_.size();
         do {
-            Player   aPlayer  = this.players_.get(currentPlayer);
-            PlayerIO playerIO = aPlayer.getPlayerIO();
-            Bank     hand     = aPlayer.findBank(Game.PLAYER_HAND);
-            Turn     turn     = new Turn(playerIO, hand, this.board_);
-            roundOver         = turn.play();
-            currentPlayer     = (currentPlayer + 1) % nPlayers;
+            Player<PlayingCard> aPlayer  = this.players_.get(currentPlayer);
+            PlayerIO            playerIO = aPlayer.getPlayerIO();
+            
+            Hand<PlayingCard> hand = aPlayer.findHand(Game.PLAYER_HAND);
+            Turn              turn = new Turn(playerIO, hand, this.board_);
+            roundOver              = turn.play();
+            currentPlayer          = (currentPlayer + 1) % nPlayers;
         } while (!roundOver);
     }
     
-    // For each {@code Player}, discards the remaining {@code Card}s in their
-    // hand and adds {@code Points} to the {@code Player}'s total depending on
-    // the {@code Rank}s of the {@code Card}s.
+    // For each {@code Player}, discards the remaining {@code PlayingCard}s in
+    // their hand and adds {@code Points} to the {@code Player}'s total
+    // depending on the {@code Rank}s of the {@code PlayingCard}s.
     private void distributePoints()
     {
-        for (Player aPlayer : this.players_) {
-            int  points = 0;
-            Bank hand   = aPlayer.findBank(Game.PLAYER_HAND);
-            int  nCards = hand.size();
+        for (Player<PlayingCard> aPlayer : this.players_) {
+            int               points = 0;
+            Hand<PlayingCard> hand   = aPlayer.findHand(Game.PLAYER_HAND);
+            int               nCards = hand.size();
             
             for (int i = 0; i < nCards; i++) {
-                Rank aRank = hand.draw().getRank();
+                PlayingCard aCard = hand.get(0);
+                Rank        aRank = aCard.getRank();
+                hand.remove(aCard);
                 if (aRank == Rank.JOKER)
                     points += Game.JOKER_CARD_VALUE;
                 else
@@ -89,9 +93,9 @@ public class Game
     private void createPlayers(int nPlayers)
     {
         for (int i = 0; i < nPlayers; i++) {
-            PlayerIO type    = new ConsolePlayerIO();
-            Player   aPlayer = new Player(type, 0, 0);
-            aPlayer.addBank(new Bank(Game.PLAYER_HAND));
+            PlayerIO            type    = new ConsolePlayerIO();
+            Player<PlayingCard> aPlayer = new Player<PlayingCard>(type, 0, 0);
+            aPlayer.addHand(new Hand<PlayingCard>(Game.PLAYER_HAND));
             this.players_.add(aPlayer);
         }
     }

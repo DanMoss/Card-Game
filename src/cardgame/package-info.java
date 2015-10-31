@@ -1,8 +1,0 @@
-/**
- * 
- */
-/**
- * @author Dan
- *
- */
-package cardgame;

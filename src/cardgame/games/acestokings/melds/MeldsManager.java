@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import cardgame.card.Card;
+import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
 import cardgame.card.Rank;
 import cardgame.card.Suit;
@@ -53,14 +53,15 @@ public class MeldsManager
     }
     
     /**
-     * Finds possible plays that can be made with some {@code Card}s, and then
-     * prompts the {@code PlayerIO} to pick one.
+     * Finds possible plays that can be made with some {@code PlayingCard}s,
+     * and then prompts the {@code PlayerIO} to pick one.
      * 
      * @param aPlayerIO the {@code PlayerIO} to interact with
-     * @param hand      the source of the {@code Card}s
-     * @param cards     the {@code Card}s to play
+     * @param hand      the source of the {@code PlayingCard}s
+     * @param cards     the {@code PlayingCard}s to play
      */
-    public void play(PlayerIO aPlayerIO, CardCollection hand, Card... cards)
+    public void play(PlayerIO aPlayerIO, CardCollection<PlayingCard> hand,
+                     PlayingCard... cards)
     {
         List<PlayOption> optionsList = findPlayOptions(cards);
         int              nOptions    = optionsList.size();
@@ -76,8 +77,8 @@ public class MeldsManager
         }
     }
     
-    // Creates a list of possible plays for some {@code Card}s
-    private List<PlayOption> findPlayOptions(Card... cards)
+    // Creates a list of possible plays for some {@code PlayingCard}s
+    private List<PlayOption> findPlayOptions(PlayingCard... cards)
     {
         List<PlayOption> options = new ArrayList<PlayOption>();
         
