@@ -3,6 +3,7 @@ package cardgame.card;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -76,6 +77,15 @@ public class Stack<T extends Card>
     public String getMessage()
     {
         return this.name_;
+    }
+    
+    /* (non-Javadoc)
+     * @see Iterable#iterator()
+     */
+    @Override
+    public Iterator<T> iterator()
+    {
+        return this.cards_.iterator();
     }
     
     /* (non-Javadoc)

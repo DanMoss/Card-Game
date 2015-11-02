@@ -54,7 +54,7 @@ class Turn
         PlayingCard aCard;
 
         do {
-            aCard         = chooseCards(1)[0];
+            aCard         = this.hand_.pickCards(this.playerIO_, 1).get(0);
             cannotDiscard = aCard.equals(this.topCardOfDiscards_);
             if (cannotDiscard) {
                 String message = "You may not discard a card you drew this "
@@ -75,26 +75,6 @@ class Turn
         String message = "What would you like to do?";
         TurnAction choice = Selector.select(this.playerIO_, message, options);
         return choice;
-    }
-    
-    // Prompts the {@code PlayerIO} to choose {@code nCards} from their hand.
-    private PlayingCard[] chooseCards(int nCards)
-    {
-        List<PlayingCard> handCopy = new ArrayList<PlayingCard>();
-        int               handSize = this.hand_.size();
-        for (int i = 0; i < handSize; i++)
-            handCopy.add(this.hand_.get(i));
-        
-        PlayingCard[] choices = new PlayingCard[nCards];
-        String        message = "Which card would you like to play?";
-        for (int j = 0; j < nCards; j++) {
-            PlayingCard aCard = Selector.select(this.playerIO_, message,
-                                                handCopy);
-            handCopy.remove(aCard);
-            choices[j] = aCard;
-        }
-        
-        return choices;
     }
     
     // Prompts the {@code PlayerIO} to choose the size of the meld.
@@ -149,9 +129,14 @@ class Turn
             else
                 nCardsToPlay = chooseMeldSize();
             
-            PlayingCard[] cards = chooseCards(nCardsToPlay);
+            List<PlayingCard> cardsList = this.hand_.pickCards(
+                                              this.playerIO_, nCardsToPlay);
+            PlayingCard[]     cards     = new PlayingCard[nCardsToPlay];
+            cards                       = cardsList.toArray(cards);
             if (verifyCanDiscardAfter(cards))
                 this.board_.playToMeld(this.playerIO_, this.hand_, cards);
+            else
+                this.playerIO_.sendMessage("You wouldn't be able to discard!");
         }
         
         return turnOver;

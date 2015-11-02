@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  * @param <T> the type of {@code Card}s this {@code Deck} will consist of
  */
 public interface Drawable<T extends Card>
-    extends CardCollection<T>
+    extends CardCollection<T>, Iterable<T>
 {
     /**
      * Draws a {@code Card} from this {@code Drawable}.

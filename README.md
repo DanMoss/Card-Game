@@ -48,7 +48,6 @@ Tasks are not necessarily listed any particular order. Entries are removed upon 
 - [ ] Review access modifier usage.
 - [ ] Review the use of getters/setters.
 - [ ] Review the RunMeld class and consider creating a Run class to support it.
-- [ ] Review complexity of methods surrounding playing cards.
 - [ ] Review the implementation of event management.
 - [ ] Review the Turn class and its supporting classes.
 - [ ] Implement some kind of player management system for things such as the scoreboard and their hands.

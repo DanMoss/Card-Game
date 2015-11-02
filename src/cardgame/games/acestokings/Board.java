@@ -52,10 +52,9 @@ class Board
     {
         int nCardsLeft = this.deck_.size();
         if (nCardsLeft == 0) {
-            PlayingCard topCard      = this.discards_.draw();
-            int         discardsSize = this.discards_.size();
-            for (int i = 0; i < discardsSize; i++)
-                this.deck_.add(this.discards_.draw());
+            PlayingCard topCard = this.discards_.draw();
+            for (PlayingCard aCard : this.discards_)
+                this.discards_.transferTo(this.deck_, aCard);
             this.deck_.shuffle();
             this.discards_.add(topCard);
         }

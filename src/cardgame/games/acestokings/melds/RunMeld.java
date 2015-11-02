@@ -98,7 +98,7 @@ class RunMeld extends AbstractMeld
             for (Rank aRank : ranks) {
                 PlayingCard mimickedCard = new PlayingCard(aRank, meldSuit_);
                 boolean  mimickedPresent = this.cards_.contains(mimickedCard);
-                boolean  neighboursExist = checkForNeighbours(aCard);
+                boolean  neighboursExist = checkForNeighbours(aRank);
                 
                 if (neighboursExist && !mimickedPresent) {
                     this.playOptionJokers_.add(aRank);
@@ -108,8 +108,9 @@ class RunMeld extends AbstractMeld
             }
         }
         else if (correctSuit) {
-            if (checkForNeighbours(aCard))
-                addOption(options, aCard.getRank(), aCard);
+            Rank aRank = aCard.getRank();
+            if (checkForNeighbours(aRank))
+                addOption(options, aRank, aCard);
         }
     }
     
@@ -326,27 +327,25 @@ class RunMeld extends AbstractMeld
         return consecutiveRanks;
     }
     
-    // Checks if the given {@code PlayingCard} could have neighbours upon being
-    // added to this {@code RunMeld}. Having neighbours is a necessary
-    // requirement of playing {@code PlayingCard}s one at a time.
+    // Checks if the given {@code Rank} could have neighbours upon being added
+    // to this {@code RunMeld}. Having neighbours is a necessary requirement of
+    // playing {@code PlayingCard}s one at a time.
     //
     // To check for neighbours, the method iterates through the list of
     // {@code Rank}s in this {@code RunMeld}. {@code Rank}s are compared to the
     // {@code Rank} of the given {@code PlayingCard} to see if they are
     // neighbours.
     // 
-    // @param  aCard the {@code PlayingCard} to check for neighbours
-    // @return true if the {@code PlayingCard} could have a neighbour after
-    //         placement
-    private boolean checkForNeighbours(PlayingCard aCard)
+    // @param  aRank the {@code Rank} to check for neighbours
+    // @return true if the {@code Rank} could have a neighbour after placement
+    private boolean checkForNeighbours(Rank aRank)
     {
-        Rank    rank1         = aCard.getRank();
         boolean isNextToAMeld = false;
         
         for (Rank rank2 : this.ranks_) {
-            boolean rank1BeforeRank2 = checkConsecutiveRanks(rank1, rank2);
-            boolean rank2BeforeRank1 = checkConsecutiveRanks(rank2, rank1);
-            if (rank1BeforeRank2 || rank2BeforeRank1)
+            boolean aRankBeforeRank2 = checkConsecutiveRanks(aRank, rank2);
+            boolean rank2BeforeARank = checkConsecutiveRanks(rank2, aRank);
+            if (aRankBeforeRank2 || rank2BeforeARank)
                 isNextToAMeld = true;
         }
         

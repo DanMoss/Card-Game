@@ -73,11 +73,9 @@ public class Game
         for (Player<PlayingCard> aPlayer : this.players_) {
             int               points = 0;
             Hand<PlayingCard> hand   = aPlayer.findHand(Game.PLAYER_HAND);
-            int               nCards = hand.size();
             
-            for (int i = 0; i < nCards; i++) {
-                PlayingCard aCard = hand.get(0);
-                Rank        aRank = aCard.getRank();
+            for (PlayingCard aCard : hand) {
+                Rank aRank = aCard.getRank();
                 hand.remove(aCard);
                 if (aRank == Rank.JOKER)
                     points += Game.JOKER_CARD_VALUE;

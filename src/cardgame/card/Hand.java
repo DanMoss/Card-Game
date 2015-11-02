@@ -2,7 +2,11 @@ package cardgame.card;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+
+import cardgame.player.PlayerIO;
+import cardgame.player.Selector;
 
 /**
  * A hand for holding cards.
@@ -10,7 +14,7 @@ import java.util.List;
  * @param <T> the type of {@code Card}s to hold.
  */
 public class Hand<T extends Card>
-    implements CardCollection<T>
+    implements CardCollection<T>, Iterable<T>
 {
     private final String  name_;
     private final List<T> cards_;
@@ -71,6 +75,15 @@ public class Hand<T extends Card>
         return this.name_;
     }
     
+    /* (non-Javadoc)
+     * @see Iterable#iterator()
+     */
+    @Override
+    public Iterator<T> iterator()
+    {
+        return this.cards_.iterator();
+    }
+    
     /**
      * Returns the {@code Card} at the specified index in this {@code Hand}.
      * 
@@ -103,5 +116,30 @@ public class Hand<T extends Card>
     public void sort(Comparator<? super T> aComparator)
     {
         this.cards_.sort(aComparator);
+    }
+    
+    /**
+     * Returns a list of a specified number of {@code Card}s from this
+     * {@code Hand} selected by a specified {@code PlayerIO}. The returned list
+     * will not contain more {@code Card}s than the number currently in this
+     * {@code Hand}.
+     * 
+     * @param  aPlayerIO the {@code PlayerIO} that will pick the {@code Card}s
+     * @param  nCards    the number of {@code Card}s to pick
+     * @return a list of {@code Card}s from this {@code Hand}
+     */
+    public List<T> pickCards(PlayerIO aPlayerIO, int nCards)
+    {
+        int     handSize       = size();
+        int     nCardsPickable = nCards < handSize ? nCards : handSize;
+        List<T> selections     = new ArrayList<T>(nCardsPickable);
+        List<T> handCopy       = new ArrayList<T>(this.cards_);
+        String  message        = "Please select a card.";
+        for (int i = 0; i < nCardsPickable; i++) {
+            T aCard = Selector.select(aPlayerIO, message, handCopy);
+            selections.add(aCard);
+            handCopy.remove(aCard);
+        }
+        return selections;
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -30,7 +31,7 @@ public class Deck<T extends Card>
      * @param dealAmount the amount of {@code Card}s that this {@code Deck}
      *                   will draw when {@link #dealTo} is called.
      */
-    public Deck(Collection<T> cards, int dealAmount)
+    public Deck(Collection<? extends T> cards, int dealAmount)
     {
         this.definingCards_ = new ArrayList<T>(cards);
         this.cardsInDeck_   = new ArrayDeque<T>(cards);
@@ -91,6 +92,18 @@ public class Deck<T extends Card>
     public String getMessage()
     {
         return "Deck";
+    }
+    
+    /**
+     * Returns an {@code Iterator} over the {@code Card}s left in this
+     * {@code Deck}.
+     * 
+     * @see Iterable#iterator()
+     */
+    @Override
+    public Iterator<T> iterator()
+    {
+        return this.cardsInDeck_.iterator();
     }
     
     /* (non-Javadoc)
