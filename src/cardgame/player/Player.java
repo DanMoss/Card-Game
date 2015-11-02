@@ -156,7 +156,7 @@ public class Player<T extends Card>
                 throw new NoSuchElementException("That hand does not exist!");
             }
             
-            String handName = aHand.toString();
+            String handName = aHand.getName();
             if (handName.equals(aName))
                 isFound = true;
             index++;

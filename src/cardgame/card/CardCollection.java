@@ -6,9 +6,6 @@ import cardgame.player.Selectable;
 
 /**
  * A collection of cards.
- */
-/**
- * A collection of cards.
  * 
  * @param <T> the type of {@code Card}s this {@code CardCollection} will
  *            consist of
@@ -32,9 +29,9 @@ public interface CardCollection <T extends Card>
      * @throws NoSuchElementException if a specified {@code Card} does not
      *                                exist in this {@code CardCollection}
      */
-    // Warning arises from the use the generic array @param cards. However, if
-    // an object not of type T is present in the array, it could not be in the
-    // CardCollection and will throw an exception when it is called to be
+    // Warning arises from the use the generic array {@param cards}. However, if
+    // an object not of type T is present in the array, it could not be in this
+    // CardCollection<T> and will throw an exception when it is called to be
     // removed in the following code.
     // (This is my understanding as of 30/10/2015)
     @SuppressWarnings("unchecked")
@@ -43,8 +40,8 @@ public interface CardCollection <T extends Card>
     {
         for (T aCard : cards) {
             if(!this.remove(aCard))
-                throw new NoSuchElementException(aCard + " does not exist in"
-                                                 + " this CardCollection!");
+                throw new NoSuchElementException(aCard + " does not exist in "
+                                                 + this.getMessage());
             destination.add(aCard);
         }
     }

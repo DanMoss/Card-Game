@@ -39,7 +39,7 @@ public class Game
     {
         int nPlayers = this.players_.size();
         for (int i = 0; i < Game.ROUNDS_TO_PLAY; i++) {
-            this.board_.setUpRound();
+            this.board_.setUpNextRound();
             for (Player<PlayingCard> aPlayer : this.players_)
                 this.board_.dealInitialHand(aPlayer.findHand(Game.PLAYER_HAND));
             playTurns();

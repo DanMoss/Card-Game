@@ -63,13 +63,12 @@ public class MeldsManager
     public void play(PlayerIO aPlayerIO, CardCollection<PlayingCard> hand,
                      PlayingCard... cards)
     {
-        List<PlayOption> optionsList = findPlayOptions(cards);
-        int              nOptions    = optionsList.size();
+        List<PlayOption> options  = findPlayOptions(cards);
+        int              nOptions = options.size();
         
         if (nOptions > 0) {
-            PlayOption[] options = new PlayOption[nOptions];
-            options              = optionsList.toArray(options);
-            PlayOption   choice  = Selector.select(aPlayerIO, options);
+            String message = "Where would you like to play these cards to?";
+            PlayOption choice = Selector.select(aPlayerIO, message, options);
             choice.play(hand);
         }
         else {

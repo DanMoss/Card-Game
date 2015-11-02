@@ -18,18 +18,23 @@ public class Deck<T extends Card>
 {
     private final List<T>            definingCards_;
     private final ArrayDeque<T>      cardsInDeck_;
+    private final int                dealAmount_;
     private final List<DrawListener> listeners_;
     
     /**
      * Sole constructor. Initialises a {@code Deck} full of the specified
-     * {@code Card}s.
+     * {@code Card}s. The {@code Deck} will deal the specified amount of
+     * {@code Card}s when the {@link #dealTo} method is called.
      * 
-     * @param cards the defining {@code Card}s for this {@code Deck}
+     * @param cards      the defining {@code Card}s for this {@code Deck}
+     * @param dealAmount the amount of {@code Card}s that this {@code Deck}
+     *                   will draw when {@link #dealTo} is called.
      */
-    public Deck(Collection<T> cards)
+    public Deck(Collection<T> cards, int dealAmount)
     {
         this.definingCards_ = new ArrayList<T>(cards);
         this.cardsInDeck_   = new ArrayDeque<T>(cards);
+        this.dealAmount_    = dealAmount;
         this.listeners_     = new ArrayList<DrawListener>();
     }
     
@@ -145,6 +150,20 @@ public class Deck<T extends Card>
         Collections.shuffle(temp, rng);
         this.cardsInDeck_.clear();
         this.cardsInDeck_.addAll(temp);
+    }
+    
+    /**
+     * Deals a number of {@code Card}s to the specified {@code CardCollection}
+     * from this {@code Deck}. The number of {@code Card}s is specified on
+     * {@code Deck} creation.
+     * 
+     * @param aCollection the {@code CardCollection} to deal to
+     * @see   #draw()
+     */
+    public void dealTo(CardCollection<? super T> aCollection)
+    {
+        for (int i = 0; i < this.dealAmount_; i++)
+            aCollection.add(this.draw());
     }
     
     /**

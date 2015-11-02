@@ -84,6 +84,16 @@ public class Hand<T extends Card>
     }
     
     /**
+     * Returns the name of this {@code Hand}.
+     * 
+     * @return the name of this {@code Hand}.
+     */
+    public String getName()
+    {
+        return this.name_;
+    }
+    
+    /**
      * Sorts the {@code Card}s in this {@code Hand} according to the order
      * induced by the specified {@code Comparator}.
      * 

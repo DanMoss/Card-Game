@@ -1,14 +1,13 @@
 package cardgame.games.acestokings;
 
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import cardgame.card.CardCollection;
 import cardgame.card.Deck;
 import cardgame.card.DrawListener;
 import cardgame.card.Drawable;
 import cardgame.card.PlayingCard;
-import cardgame.card.Rank;
 import cardgame.card.Stack;
 import cardgame.games.acestokings.melds.MeldsManager;
 import cardgame.player.PlayerIO;
@@ -27,26 +26,25 @@ class Board
     private static final int    INITIAL_HAND_SIZE = 7;
     private static final String DISCARDS          = "The discard pile";
     
-    private final Deck<PlayingCard>  deck_;
+    private final AcesToKingsDeck    deck_;
     private final Stack<PlayingCard> discards_;
     private final MeldsManager       melds_;
-    private       Rank               nextJoker_;
-    private       boolean            drewFromDiscards_;
     
-    // Sole constructor
-    Board()
+    /**
+     * Sole constructor.
+     */
+    public Board()
     {
-        this.deck_      = new Deck();
+        this.deck_     = new AcesToKingsDeck(INITIAL_HAND_SIZE);
         this.deck_.addListener(this);
-        this.discards_  = new Stack<PlayingCard>(Board.DISCARDS);
-        this.melds_     = new MeldsManager();
-        this.nextJoker_ = Rank.ACE;
+        this.discards_ = new Stack<PlayingCard>(Board.DISCARDS);
+        this.melds_    = new MeldsManager();
     }
     
     /**
-     * On being notified, refills the {@code Deck} with all but the top
-     * {@code PlayingCard} of the discard pile. The {@code Deck} is then
-     * shuffled.
+     * On being notified, refills the {@code AcesToKingsDeck} with all but the
+     * top {@code PlayingCard} of the discard pile. The {@code AcesToKingsDeck}
+     * is then shuffled.
      * 
      * @see DrawListener#onNotification()
      */
@@ -56,38 +54,37 @@ class Board
         if (nCardsLeft == 0) {
             PlayingCard topCard      = this.discards_.draw();
             int         discardsSize = this.discards_.size();
-            for (int i = 0; i < discardsSize; i++) {
-                PlayingCard aCard = this.discards_.peek();
-                this.discards_.transferTo(this.deck_, aCard);
-            }
+            for (int i = 0; i < discardsSize; i++)
+                this.deck_.add(this.discards_.draw());
             this.deck_.shuffle();
             this.discards_.add(topCard);
         }
     }
     
-    // Sets up the board for the start of the next round.
-    // 
-    // More specifically; all {@code PlayingCard}s on this {@code Board} are
-    // removed and the {@code Deck} is refilled, then the {@code Rank} of the
-    // jokers is updated, and finally the {@code Deck} is shuffled with the top
-    // {@code PlayingCard} placed on the discard pile.
-    void setUpRound()
+    /**
+     * Sets up the board for the start of the next round.
+     * <p>
+     * More specifically; the {@code AcesToKingsDeck} is refilled with the
+     * updated joker {@code Rank} and shuffled, then the remaining
+     * {@code PlayingCard}s left on this {@code Board} are removed, and finally
+     * the top {@code PlayingCard} of the {@code AcesToKingsDeck} is placed on
+     * the discard pile.
+     * 
+     * @see AcesToKingsDeck#incrementJoker()
+     */
+    public void setUpNextRound()
     {
-        this.deck_.reset();
+        this.deck_.incrementJoker();
+        this.deck_.shuffle();
         this.discards_.reset();
         this.melds_.reset();
-        Set<Rank> ranks = EnumSet.complementOf(EnumSet.of(this.nextJoker_));
-        this.deck_.setRanks(ranks);
-        this.deck_.shuffle();
-        this.nextJoker_ = this.nextJoker_.getNeighbour(true);
         this.discards_.add(this.deck_.draw());
     }
     
     // Deals the initial hand to a {@code CardCollection}.
-    void dealInitialHand(CardCollection<PlayingCard> hand)
+    void dealInitialHand(CardCollection<? super PlayingCard> aCollection)
     {
-        for (int i = 0; i < Board.INITIAL_HAND_SIZE; i++)
-            hand.add(this.deck_.draw());
+        this.deck_.dealTo(aCollection);
     }
     
     // Prompts a {@code PlayerIO} to choose a {@code Drawable} to draw from,
@@ -96,28 +93,49 @@ class Board
     {
         String message = "Would you like to draw from the deck, or take the "
                        + this.discards_.peek() + " from the discard pile?";
-        aPlayerIO.sendMessage(message);
-        Drawable<PlayingCard>[] options = {this.deck_, this.discards_};
-        Drawable<PlayingCard>   choice  = Selector.select(aPlayerIO, options);
-        this.drewFromDiscards_ = choice == this.discards_ ? true : false;
+        List<Drawable<PlayingCard>> options = new ArrayList<
+                                                      Drawable<PlayingCard>>();
+        options.add(this.deck_);
+        options.add(this.discards_);
+        Drawable<PlayingCard> choice = Selector.select(aPlayerIO, message,
+                                                       options);
         return choice.draw();
     }
     
-    // Checks if the last {@code Card} drawn was from the discard pile.
-    boolean checkIfLastDrewFromDiscards()
+    /**
+     * Returns the top {@code PlayingCard} of the discard pile.
+     * 
+     * @return the top {@code PlayingCard} of the discard pile
+     * @see    Stack#peek()
+     */
+    public PlayingCard peekAtDiscards()
     {
-        return this.drewFromDiscards_;
+        return this.discards_.peek();
     }
     
-    // Wrapper for the play method in MeldsManager.
-    void playToMeld(PlayerIO aPlayerIO, CardCollection<PlayingCard> hand,
-                    PlayingCard... cards)
+    /**
+     * Attempts to play the specified {@code PlayingCard}s from the specified
+     * {@code PlayerIO}'s {@code CardCollection} to an {@code AbstractMeld} on
+     * this {@code Board}. Wrapper for 
+     * {@link MeldsManager#play(PlayerIO, CardCollection, PlayingCard...)}.
+     * 
+     * @param aPlayerIO   the {@code PlayerIO} to interact with
+     * @param aCollection the source of the {@code PlayingCard}s to play
+     * @param cards       the {@code PlayingCard}s to play
+     */
+    public void playToMeld(PlayerIO aPlayerIO,
+                           CardCollection<PlayingCard> aCollection,
+                           PlayingCard... cards)
     {
-        this.melds_.play(aPlayerIO, hand, cards);
+        this.melds_.play(aPlayerIO, aCollection, cards);
     }
     
-    // Discards the specified {@code PlayingCard} to the discard pile.
-    void addToDiscards(PlayingCard aCard)
+    /**
+     * Adds the specified {@code PlayingCard} to the top of the discard pile.
+     * 
+     * @param aCard the {@code PlayingCard} to add
+     */
+    public void addToDiscards(PlayingCard aCard)
     {
         this.discards_.add(aCard);
     }

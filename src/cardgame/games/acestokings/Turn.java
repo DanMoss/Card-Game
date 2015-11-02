@@ -1,5 +1,8 @@
 package cardgame.games.acestokings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cardgame.card.CardCollection;
 import cardgame.card.Hand;
 import cardgame.card.PlayingCard;
@@ -14,22 +17,23 @@ class Turn
     private final PlayerIO          playerIO_;
     private final Hand<PlayingCard> hand_;
     private final Board             board_;
-    private       PlayingCard       drawnCard_;
+    private       PlayingCard       topCardOfDiscards_;
     
     // Constructor
     public Turn(PlayerIO aPlayerIO, Hand<PlayingCard> hand, Board aBoard)
     {
-        this.playerIO_ = aPlayerIO;
-        this.hand_     = hand;
-        this.board_    = aBoard;
+        this.playerIO_          = aPlayerIO;
+        this.hand_              = hand;
+        this.board_             = aBoard;
+        this.topCardOfDiscards_ = aBoard.peekAtDiscards();
     }
     
     // Plays the turn out. Returns true if the hand has no cards left.
     boolean play()
     {
-        this.drawnCard_ = this.board_.draw(this.playerIO_);
-        this.hand_.add(this.drawnCard_);
-        this.playerIO_.sendMessage("You drew the " + this.drawnCard_);
+        PlayingCard drawnCard = this.board_.draw(this.playerIO_);
+        this.hand_.add(drawnCard);
+        this.playerIO_.sendMessage("You drew the " + drawnCard);
         boolean turnOver;
         
         do {
@@ -46,13 +50,12 @@ class Turn
     // can not be discarded this turn.
     private void discard()
     {
-        boolean cannotDiscard;
+        boolean     cannotDiscard;
         PlayingCard aCard;
-        boolean drewFromDiscards = this.board_.checkIfLastDrewFromDiscards();
 
         do {
             aCard         = chooseCards(1)[0];
-            cannotDiscard = drewFromDiscards && aCard.equals(this.drawnCard_);
+            cannotDiscard = aCard.equals(this.topCardOfDiscards_);
             if (cannotDiscard) {
                 String message = "You may not discard a card you drew this "
                                + "turn from the discard pile.";
@@ -67,46 +70,42 @@ class Turn
     // Prompts the {@code PlayerIO} to decide what to do
     private TurnAction chooseAction()
     {
-        int          handSize  = this.hand_.size();
-        TurnAction[] options   = TurnAction.findPossibleActions(handSize);
-        this.playerIO_.sendMessage("What would you like to do?");
-        TurnAction   selection = Selector.select(this.playerIO_, options);
-        return selection;
+        int              handSize = this.hand_.size();
+        List<TurnAction> options  = TurnAction.findPossibleActions(handSize);
+        String message = "What would you like to do?";
+        TurnAction choice = Selector.select(this.playerIO_, message, options);
+        return choice;
     }
     
     // Prompts the {@code PlayerIO} to choose {@code nCards} from their hand.
-    //
-    // A temporary array is created to hold chosen {@code PlayingCard}s, which
-    // are removed temporarily to prevent duplicate selections.
     private PlayingCard[] chooseCards(int nCards)
     {
-        CardCollection<PlayingCard> temp  = new Hand<PlayingCard>("");
-        PlayingCard[]               cards = new PlayingCard[nCards];
+        List<PlayingCard> handCopy = new ArrayList<PlayingCard>();
+        int               handSize = this.hand_.size();
+        for (int i = 0; i < handSize; i++)
+            handCopy.add(this.hand_.get(i));
         
-        for (int i = 0; i < nCards; i++) {
-            int           handSize = this.hand_.size();
-            PlayingCard[] array    = new PlayingCard[handSize];
-            for (int j = 0; j < handSize; j++)
-                array[j] = this.hand_.get(j);
-            
-            PlayingCard aCard = Selector.select(this.playerIO_, array);
-            cards[i]          = aCard;
-            this.hand_.transferTo(temp, aCard);
+        PlayingCard[] choices = new PlayingCard[nCards];
+        String        message = "Which card would you like to play?";
+        for (int j = 0; j < nCards; j++) {
+            PlayingCard aCard = Selector.select(this.playerIO_, message,
+                                                handCopy);
+            handCopy.remove(aCard);
+            choices[j] = aCard;
         }
-        temp.transferTo(this.hand_, cards);
         
-        return cards;
+        return choices;
     }
     
     // Prompts the {@code PlayerIO} to choose the size of the meld.
     private int chooseMeldSize()
     {
-        int        maxSize = this.hand_.size();
-        MeldSize[] options = new MeldSize[maxSize];
+        int            maxSize = this.hand_.size();
+        List<MeldSize> options = new ArrayList<MeldSize>();
         for (int i = 0; i < maxSize; i++)
-            options[i] = new MeldSize(i);
-        this.playerIO_.sendMessage("How many cards would you like to use?");
-        MeldSize selection = Selector.select(this.playerIO_, options);
+            options.add(new MeldSize(i));
+        String   message   = "How many cards would you like to use?";
+        MeldSize selection = Selector.select(this.playerIO_, message, options);
         return selection.getSize();
     }
     
@@ -117,20 +116,19 @@ class Turn
     // drew from the discard pile on the turn that they drew it.
     private boolean verifyCanDiscardAfter(PlayingCard... cards)
     {
-        boolean drewFromDiscards = this.board_.checkIfLastDrewFromDiscards();
-        boolean canDiscardAfter  = true;
+        boolean canDiscardAfter = true;
         
-        if (drewFromDiscards) {
-            CardCollection<PlayingCard> temp = new Hand<PlayingCard>("");
-            this.hand_.transferTo(temp, cards);
-            // Only card left in hand is the drawn card
-            if (this.hand_.remove(this.drawnCard_) && this.hand_.size() == 0) {
-                canDiscardAfter = false;
-                this.hand_.add(this.drawnCard_);
-            }
-            
-            temp.transferTo(this.hand_, cards);
+        CardCollection<PlayingCard> temp = new Hand<PlayingCard>("");
+        this.hand_.transferTo(temp, cards);
+        
+        // Only card left in hand is the drawn card
+        boolean cardWasInHand = this.hand_.remove(this.topCardOfDiscards_);
+        if (cardWasInHand && this.hand_.size() == 0) {
+            canDiscardAfter = false;
+            this.hand_.add(this.topCardOfDiscards_);
         }
+            
+        temp.transferTo(this.hand_, cards);
         
         return canDiscardAfter;
     }

@@ -1,5 +1,8 @@
 package cardgame.games.acestokings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cardgame.player.Selectable;
 
 /**
@@ -34,32 +37,19 @@ enum TurnAction
         return message_;
     }
     
-    // Returns the possible {@code TurnAction}s that can be performed based on
-    // the {@code handSize}.
+    // Returns a list of the possible {@code TurnAction}s that can be performed
+    // based on the {@code handSize}.
     // 
-    // First loops through all {@code TurnAction}s to count the possibilities,
-    // then creates an array and adds each possibility to it.
-    // 
-    // @param  handSize 
+    // @param  handSize the size of the hand
     // @return the possible {@code TurnAction}s
-    static TurnAction[] findPossibleActions(int handSize)
+    static List<TurnAction>findPossibleActions(int handSize)
     {
-        TurnAction[] allActions = TurnAction.values();
-        int          nActions   = 0;
+        TurnAction[]     allActions = TurnAction.values();
+        List<TurnAction> options    = new ArrayList<TurnAction>();
         for (TurnAction anAction : allActions) {
             if (anAction.minHandSizeToPlay_ <= handSize)
-                nActions++;
+                options.add(anAction);
         }
-        
-        TurnAction[] options = new TurnAction[nActions];
-        int          index   = 0;
-        for (TurnAction anAction : allActions) {
-            if (anAction.minHandSizeToPlay_ <= handSize) {
-                options[index] = anAction;
-                index++;
-            }
-        }
-        
         return options;
     }
 }
