@@ -5,10 +5,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
-import cardgame.card.Rank;
-import cardgame.card.Suit;
+import cardgame.card.traditional.PlayingCard;
+import cardgame.card.traditional.Rank;
+import cardgame.card.traditional.Suit;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
 
@@ -16,7 +16,7 @@ import cardgame.player.Selector;
  * A manager for the various kinds of melds. Handles find plays for selections
  * of cards and selecting a play for them.
  * 
- * @see AbstractMeld
+ * @see Meld
  * @see PlayOption
  * @see cardgame.player.PlayerIO
  * @see cardgame.player.Selector
@@ -25,19 +25,18 @@ public class MeldsManager
 {
     static final int MINIMUM_MELD_SIZE = 3;
     
-    private final AbstractMeld[] rankMelds_;
-    private final AbstractMeld[] runMelds_;
+    private final Meld[] rankMelds_;
+    private final Meld[] runMelds_;
     
     /**
-     * Sole constructor. Creates all necessary {@code AbstractMeld}s for a
-     * game.
+     * Sole constructor. Creates all necessary {@code Meld}s for a game.
      */
     public MeldsManager()
     {
         Set<Rank> ranks = EnumSet.range(Rank.ACE, Rank.KING);
         Set<Suit> suits = EnumSet.range(Suit.CLUBS, Suit.SPADES);
-        this.rankMelds_ = new AbstractMeld[ranks.size()];
-        this.runMelds_  = new AbstractMeld[suits.size()];
+        this.rankMelds_ = new Meld[ranks.size()];
+        this.runMelds_  = new Meld[suits.size()];
         
         int i = 0;
         for (Rank aRank : ranks) {
@@ -81,23 +80,23 @@ public class MeldsManager
     {
         List<PlayOption> options = new ArrayList<PlayOption>();
         
-        for (AbstractMeld aRankMeld : this.rankMelds_)
+        for (Meld aRankMeld : this.rankMelds_)
             aRankMeld.findPlayOptions(options, cards);
             
-        for (AbstractMeld aRunMeld : this.runMelds_)
+        for (Meld aRunMeld : this.runMelds_)
             aRunMeld.findPlayOptions(options, cards);
         
         return options;
     }
     
     /**
-     * Resets all of the {@code AbstractMeld}s to their initial state (empty).
+     * Resets all of the {@code Meld}s to their initial state (empty).
      */
     public void reset()
     {
-        for (AbstractMeld aRankMeld : this.rankMelds_)
+        for (Meld aRankMeld : this.rankMelds_)
             aRankMeld.reset();
-        for (AbstractMeld aRunMeld : this.runMelds_)
+        for (Meld aRunMeld : this.runMelds_)
             aRunMeld.reset();
     }
 }

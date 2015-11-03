@@ -5,7 +5,7 @@ import java.util.List;
 
 import cardgame.card.CardCollection;
 import cardgame.card.Hand;
-import cardgame.card.PlayingCard;
+import cardgame.card.traditional.PlayingCard;
 import cardgame.player.PlayerIO;
 import cardgame.player.Selector;
 
@@ -37,7 +37,7 @@ class Turn
         boolean turnOver;
         
         do {
-            this.hand_.sort(null);
+            this.hand_.sort(PlayingCard.Comparators.SUIT_FIRST);
             turnOver = processAction(chooseAction());
         } while (!turnOver);
         discard();

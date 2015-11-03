@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import cardgame.card.Hand;
-import cardgame.card.PlayingCard;
-import cardgame.card.Rank;
+import cardgame.card.traditional.PlayingCard;
+import cardgame.card.traditional.Rank;
 import cardgame.player.ConsolePlayerIO;
 import cardgame.player.Player;
 import cardgame.player.PlayerIO;

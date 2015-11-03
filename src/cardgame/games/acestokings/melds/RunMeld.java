@@ -5,21 +5,21 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
-import cardgame.card.Rank;
-import cardgame.card.Suit;
+import cardgame.card.traditional.PlayingCard;
+import cardgame.card.traditional.Rank;
+import cardgame.card.traditional.Suit;
 
 /**
  * A meld of cards that have the same suit. May contain jokers mimicking other
  * cards. Aces can be either high or low, but once chosen must remain either
  * high or low.
  * 
- * @see AbstractMeld
+ * @see Meld
  * @see PlayingCard
  * @see Suit
  */
-class RunMeld extends AbstractMeld
+class RunMeld extends Meld
 {
     private static final int HIGH_ACE_VALUE = Rank.KING.getValue() + 1;
     private static final int LOW_ACE_VALUE  = Rank.TWO.getValue()  - 1;
@@ -87,7 +87,7 @@ class RunMeld extends AbstractMeld
      * position that is already occupied by the {@code PlayingCard} the joker
      * would attempt to mimic.
      * 
-     * @see AbstractMeld#addCardPlays(List, PlayingCard)
+     * @see Meld#addCardPlays(List, PlayingCard)
      */
     protected void addCardPlays(List<PlayOption> options, PlayingCard aCard)
     {
@@ -126,7 +126,7 @@ class RunMeld extends AbstractMeld
      * be appropriately added to this {@code RunMeld} without removing the 
      * actual {@code PlayingCard} they would be mimicking.
      * 
-     * @see AbstractMeld#addMeldPlays(List, PlayingCard[])
+     * @see Meld#addMeldPlays(List, PlayingCard[])
      */
     protected void addMeldPlays(List<PlayOption> options, PlayingCard... cards)
     {

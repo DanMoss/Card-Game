@@ -7,9 +7,9 @@ import java.util.EnumSet;
 import java.util.Queue;
 
 import cardgame.card.Deck;
-import cardgame.card.PlayingCard;
-import cardgame.card.Rank;
-import cardgame.card.Suit;
+import cardgame.card.traditional.PlayingCard;
+import cardgame.card.traditional.Rank;
+import cardgame.card.traditional.Suit;
 
 /**
  * A specialised deck for the card game Aces to Kings.

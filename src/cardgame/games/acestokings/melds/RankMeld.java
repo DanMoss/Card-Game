@@ -3,19 +3,19 @@ package cardgame.games.acestokings.melds;
 import java.util.ArrayList;
 import java.util.List;
 
-import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
-import cardgame.card.Rank;
+import cardgame.card.traditional.PlayingCard;
+import cardgame.card.traditional.Rank;
 
 /**
  * A meld of cards that have the same rank. May contain jokers mimicking other
  * cards.
  * 
- * @see AbstractMeld
+ * @see Meld
  * @see PlayingCard
  * @see Rank
  */
-class RankMeld extends AbstractMeld
+class RankMeld extends Meld
 {
     private static final int MELD_CAPACITY = 4;
     
@@ -37,8 +37,9 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#play(CardCollection, PlayOption)
+     * @see Meld#play(CardCollection, PlayOption)
      */
+    @Override
     protected void play(CardCollection<PlayingCard> collection,
                         PlayOption option)
     {
@@ -55,7 +56,7 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#addCardPlays(java.util.List, PlayingCard)
+     * @see Meld#addCardPlays(java.util.List, PlayingCard)
      */
     protected void addCardPlays(List<PlayOption> options, PlayingCard aCard)
     {
@@ -67,7 +68,7 @@ class RankMeld extends AbstractMeld
     }
     
     /* (non-Javadoc)
-     * @see AbstractMeld#addMeldPlays(java.util.List, PlayingCard[])
+     * @see Meld#addMeldPlays(java.util.List, PlayingCard[])
      */
     protected void addMeldPlays(List<PlayOption> options, PlayingCard... cards)
     {

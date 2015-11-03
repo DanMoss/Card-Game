@@ -3,22 +3,22 @@ package cardgame.games.acestokings.melds;
 import java.util.ArrayList;
 import java.util.List;
 
-import cardgame.card.PlayingCard;
 import cardgame.card.CardCollection;
-import cardgame.card.Rank;
+import cardgame.card.traditional.PlayingCard;
+import cardgame.card.traditional.Rank;
 import cardgame.player.Selectable;
 
 /**
  * A possible play that can be made with some cards to a meld.
  * 
- * @see AbstractMeld
+ * @see Meld
  * @see PlayingCard
  * @see Selectable
  */
 class PlayOption
     implements Selectable
 {
-    private final AbstractMeld  meld_;
+    private final Meld          meld_;
     private final PlayingCard[] cards_;
     private final List<Rank>    jokers_;
     private       int           aceValue_;
@@ -28,12 +28,12 @@ class PlayOption
     /**
      * Sole constructor.
      * 
-     * @param meld  the destination {@AbstractMeld} for the 
-     *              {@code PlayingCard}s in the {@code PlayOption}
+     * @param meld  the destination {@code Meld} for the {@code PlayingCard}s
+     *              in the {@code PlayOption}
      * @param cards the {@code PlayingCard}s to play if the {@code PlayOption}
      *              is selected
      */
-    public PlayOption(AbstractMeld aMeld, PlayingCard... cards)
+    public PlayOption(Meld aMeld, PlayingCard... cards)
     {
         this.meld_                = aMeld;
         this.cards_               = cards;
@@ -131,7 +131,7 @@ class PlayOption
     
     /**
      * Plays the {@code PlayingCard}s in this {@code PlayOption} to the
-     * {@code AbstractMeld}.
+     * {@code Meld}.
      * 
      * @param collection the source of the {@code PlayingCard}s
      */

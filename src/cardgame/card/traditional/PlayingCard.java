@@ -1,4 +1,8 @@
-package cardgame.card;
+package cardgame.card.traditional;
+
+import java.util.Comparator;
+
+import cardgame.card.Card;
 
 /**
  * A standard playing card.
@@ -7,7 +11,6 @@ package cardgame.card;
  * @see Suit
  */
 public class PlayingCard extends Card
-    implements Comparable<PlayingCard>
 {
     private final Rank rank_;
     private final Suit suit_;
@@ -99,27 +102,60 @@ public class PlayingCard extends Card
     }
     
     /**
-     * Compares this {@code PlayingCard} with another specified
-     * {@code PlayingCard} {@code aCard} for ordering. Returns a negative
-     * integer, zero, or a positive integer as this {@code PlayingCard} is less
-     * than, equal to, or greater the specified {@code PlayingCard}.
-     * <p>
-     * {@code PlayingCard}s are first compared by the natural ordering of their
-     * {@code Suit}s, and then the natural ordering of their {@code Rank}s if
-     * they have the same {@code Suit}. The implementation of this method
-     * follows the contract set out in {@code Comparable}.
-     * 
-     * @param aCard the {@code PlayingCard} to be compared with
-     * @see   Rank
-     * @see   Suit
-     * @see   java.lang.Comparable#compareTo(java.lang.Object)
+     * The possible comparators for ordering playing cards.
      */
-    @Override
-    public int compareTo(PlayingCard aCard)
+    public static class Comparators
     {
-        int result = getSuit().compareTo(aCard.getSuit());
-        if (result == 0)
-            result = getRank().compareTo(aCard.getRank());
-        return result;
+        /**
+         * A {@code Comparator} which orders {@code PlayingCard}s first by
+         * their {@code Suit}s, Clubs < Spades < Jokers, and then by their
+         * {@code Rank}s, Aces < Kings < Jokers.
+         * 
+         * @see Comparator
+         */
+        public static Comparator<PlayingCard> SUIT_FIRST = new Comparator<
+                                                               PlayingCard>() {
+            @Override
+            public int compare(PlayingCard card1, PlayingCard card2)
+            {
+                int result = Comparators.compareSuits(card1, card2);
+                if (result == 0)
+                    result = Comparators.compareRanks(card1, card2);
+                return result;
+            }
+        };
+        
+        /**
+         * A {@code Comparator} which orders {@code PlayingCard}s first by
+         * their {@code Rank}s, Aces < Kings < Jokers, and then by their
+         * {@code Suit}s, Clubs < Spades < Jokers.
+         * 
+         * @see Comparator
+         */
+        public static Comparator<PlayingCard> RANK_FIRST = new Comparator<
+                                                               PlayingCard>() {
+            @Override
+            public int compare(PlayingCard card1, PlayingCard card2)
+            {
+                int result = Comparators.compareRanks(card1, card2);
+                if (result == 0)
+                    result = Comparators.compareSuits(card1, card2);
+                return result;
+            }
+        };
+        
+        // Compares the {@code Rank}s of the specified {@code PlayingCard}s.
+        // {@code Rank}s are ordered Aces < Kings < Jokers.
+        private static int compareRanks(PlayingCard card1, PlayingCard card2)
+        {
+            return card1.getRank().compareTo(card2.getRank());
+        }
+        
+        // Compares the {@code Suit}s of the specified {@code PlayingCard}s.
+        // {@code Suit}s are ordered Clubs < Spades < Jokers.
+        private static int compareSuits(PlayingCard card1, PlayingCard card2)
+        {
+            return card1.getSuit().compareTo(card2.getSuit());
+        }
     }
 }

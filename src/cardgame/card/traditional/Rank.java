@@ -1,4 +1,4 @@
-package cardgame.card;
+package cardgame.card.traditional;
 
 /**
  * An enum of the thirteen standard playing card ranks, along with a joker rank

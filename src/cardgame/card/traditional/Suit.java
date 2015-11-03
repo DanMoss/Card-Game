@@ -1,4 +1,4 @@
-package cardgame.card;
+package cardgame.card.traditional;
 
 /**
  * An enum of the four standard playing card suits, along with a joker suit for
